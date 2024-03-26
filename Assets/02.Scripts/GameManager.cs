@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    private static GameManager instance;
+    public static GameManager Instance;
 
     private bool isGameOver = false;
     private bool isGamePaused = false;
@@ -15,8 +15,8 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if (GameManager.instance == null)
-            GameManager.instance = this;
+        if (Instance == null) Instance = this;
+        else if (Instance != this) Destroy(gameObject);
     }
 
     void Start()
@@ -29,12 +29,13 @@ public class GameManager : MonoBehaviour
         
     }
 
-    public void Report(GameObject reporter, GameObject suspect)
+    public void Report(GameObject reporter, GameObject corpse, GameObject suspect)
     {
         GameObject police = GameObject.FindGameObjectWithTag("Police");
         if (police != null)
         {
             // °æÂû Ãâµ¿ ¾øÀÌ ÂÑ´ø °Å³ª °è¼Ó ÂÑÀ½
+            police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, policeCount);
         }
         else
         {

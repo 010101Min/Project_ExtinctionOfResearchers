@@ -41,7 +41,7 @@ public class NPCController : MonoBehaviour
     public GameObject player;
     private NavMeshAgent agent;
     private Animator anim;
-    public Transform[] pos = new Transform[1];
+    public Transform[] pos = new Transform[2];
 
     private Coroutine idleCoroutine;
     private Coroutine moveCoroutine;
@@ -161,6 +161,7 @@ public class NPCController : MonoBehaviour
     // 시신 발견시 불러올 함수
     public void fDetected()
     {
+        // 시신 위에 경광등 띄우기
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         isCarriable = false;
         gameObject.GetComponent<NPCController>().isDetected = true;
@@ -175,6 +176,14 @@ public class NPCController : MonoBehaviour
         {
             // 게임매니저에서 킬 수 올리기 필요
         }
+        Destroy(gameObject);
+    }
+
+    // 시신 수습시 불러올 함수
+    public void fResolved()
+    {
+        initCoroutine();
+        // 아직 이펙트 없어서 임시로 삭제
         Destroy(gameObject);
     }
 
@@ -200,7 +209,8 @@ public class NPCController : MonoBehaviour
     }
 
     // 선 긋는 함수
-    private GameObject DrawLine(Vector3 startPoint, Vector3 endPoint)
+    private void fDrawLine(Transform startPoint, Transform endPoint) { StartCoroutine(cDrawLine(startPoint, endPoint)); }
+    IEnumerator cDrawLine(Transform startPoint, Transform endPoint)
     {
         GameObject lineObject = new GameObject("LineObject");
         LineRenderer lineRenderer = lineObject.AddComponent<LineRenderer>();
@@ -208,10 +218,17 @@ public class NPCController : MonoBehaviour
         lineRenderer.startWidth = 0.1f;
         lineRenderer.endWidth = 0.1f;
         lineRenderer.material.color = Color.red;
-        lineRenderer.SetPosition(0, startPoint);
-        lineRenderer.SetPosition(1, endPoint);
 
-        return lineObject;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < 0.5f)
+        {
+            lineRenderer.SetPosition(0, startPoint.position);
+            lineRenderer.SetPosition(1, endPoint.position);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        Destroy(lineObject);
     }
 
     // IDLE 상태 구현
@@ -277,16 +294,14 @@ public class NPCController : MonoBehaviour
 
     // Report 상태 구현
     private void fReport(GameObject corpse) { initCoroutine(); reportCoroutine = StartCoroutine(cReport(corpse)); }
-    IEnumerator cReport(GameObject corpse)
+    // 신고할 위치 찾는 함수
+    private GameObject findPlace()
     {
-        bool tempProvokable = provokable;
-        provokable = false;
-
-        // 신고할 위치 결정... 전화기/경찰
         float minDistance = float.MaxValue;
         GameObject dest = this.gameObject;
         GameObject Police = GameObject.FindGameObjectWithTag("Police");
-        if (Police == null) {
+        if (Police == null)
+        {
             GameObject[] phones = GameObject.FindGameObjectsWithTag("Phone");
             minDistance = float.MaxValue;
             for (int i = 0; i < phones.Length; i++)
@@ -300,21 +315,39 @@ public class NPCController : MonoBehaviour
             }
         }
         else { dest = Police; }
+        return dest;
+    }
+    IEnumerator cReport(GameObject corpse)
+    {
+        bool tempProvokable = provokable;
+        provokable = false;
+
+        // 신고할 위치 결정
+        GameObject dest = findPlace();
         
         // 의심할 캐릭터 결정
         // 만약 의심할 캐릭터가 없다면 자기 자신을 의심 (경찰 신고 시 신고자와 용의자 모두 받도록...)
         Collider[] colls = new Collider[13];
         int layer = 1 << LayerMask.NameToLayer("NPC");
-        int count = Physics.OverlapSphereNonAlloc(corpse.transform.position, 2f, colls, layer);
+        int count = Physics.OverlapSphereNonAlloc(corpse.transform.position, 3f, colls, layer);
+
+        // 각 레이어의 마스크 생성
+        int npcLayer = 1 << LayerMask.NameToLayer("NPC");
+        int corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
+        int policeLayer = 1 << LayerMask.NameToLayer("POLICE");
+        int uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
+
+        // 모든 레이어를 합친 후 전체에서 제외
+        int layerMask = ~(npcLayer | corpseLayer | policeLayer | uninteractableLayer);
 
         float distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
         Vector3 dirToPlayer = (player.transform.position - corpse.transform.position).normalized;
-        bool isPlayerInSight = (Physics.Raycast(transform.position, dirToPlayer, distToPlayer, ~layer)) ? false : true;
+        bool isPlayerInSight = !(Physics.Raycast(transform.position, dirToPlayer, distToPlayer, layerMask));
         float distToTarget = float.MaxValue;
 
         if (count <= 0)
         {
-            if ((distToPlayer <= 3f) && isPlayerInSight) { Suspect = player; }
+            if ((distToPlayer <= 4f) && isPlayerInSight) { Suspect = player; }
             else { Suspect = this.gameObject; }
         }
         else
@@ -322,9 +355,10 @@ public class NPCController : MonoBehaviour
             for (int i = 0; i < count; i++)
             {
                 Vector3 dirToTarget = (colls[i].gameObject.transform.position - corpse.transform.position).normalized;
-                distToTarget = Vector3.Distance(corpse.transform.position, colls[i].gameObject.transform.position);
-                if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, ~layer))   // NPC-용의자 사이에 벽이 없음
+                float distCurrent = Vector3.Distance(corpse.transform.position, colls[i].gameObject.transform.position);
+                if (!Physics.Raycast(transform.position, dirToTarget, distCurrent, layerMask) && (distCurrent <= distToTarget))   // NPC-용의자 사이에 벽이 없음
                 {
+                    distToTarget = distCurrent;
                     Suspect = colls[i].gameObject;
                 }
             }
@@ -334,26 +368,26 @@ public class NPCController : MonoBehaviour
         agent.enabled = false;
 
         // NPC - 시신 - 용의자 선 긋기
-        GameObject line = DrawLine(this.transform.position, corpse.transform.position);
-        GameObject line2 = null;
-        if (Suspect != this.gameObject) { line2 = DrawLine(corpse.transform.position, Suspect.transform.position); }
+        fDrawLine(this.transform, corpse.transform);
+        if (Suspect != this.gameObject) { fDrawLine(corpse.transform, Suspect.transform); }
         yield return new WaitForSeconds(0.5f);
-        Destroy(line);
         
-        if (line2 != null) { Destroy(line2); }
         agent.enabled = true;
         agent.speed = 5.6f;
 
-        while ((transform.position - dest.transform.position).magnitude >= 0.1f)
+        while (true)
         {
+            if (dest == null) dest = findPlace();
+            if ((transform.position - dest.transform.position).magnitude <= 2.5f) break;
             agent.SetDestination(dest.transform.position);
             yield return null;
         }
 
         // 여기에 게임매니저로 신고하는 코드 (신고 직전 isDetected 체크)
         // 신고할 위치에 가장 먼저 도착한 한 명만 신고하도록
-        if (corpse.gameObject.GetComponent<NPCController>() != null) corpse.gameObject.GetComponent<NPCController>().fDetected();
-        if (corpse.gameObject.GetComponent<PoliceController>() != null) corpse.gameObject.GetComponent<PoliceController>().fDetected();
+        GameManager.Instance.Report(this.gameObject, corpse.gameObject, Suspect.gameObject);
+        if (corpse.CompareTag("NPC")) corpse.gameObject.GetComponent<NPCController>().fDetected();
+        if (corpse.CompareTag("Police")) corpse.gameObject.GetComponent<PoliceController>().fDetected();
         Debug.Log("Suspect : " + Suspect.gameObject.name + ", Corpse : " + corpse.gameObject.name);
 
         // 원래대로 속성 돌리기
