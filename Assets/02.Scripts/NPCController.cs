@@ -184,7 +184,7 @@ public class NPCController : MonoBehaviour
     {
         initCoroutine();
         // 아직 이펙트 없어서 임시로 삭제
-        Destroy(gameObject);
+        //Destroy(gameObject);
     }
 
     // 구속시 불러올 함수
@@ -328,14 +328,14 @@ public class NPCController : MonoBehaviour
         // 의심할 캐릭터 결정
         // 만약 의심할 캐릭터가 없다면 자기 자신을 의심 (경찰 신고 시 신고자와 용의자 모두 받도록...)
         Collider[] colls = new Collider[13];
-        int layer = 1 << LayerMask.NameToLayer("NPC");
-        int count = Physics.OverlapSphereNonAlloc(corpse.transform.position, 3f, colls, layer);
 
         // 각 레이어의 마스크 생성
         int npcLayer = 1 << LayerMask.NameToLayer("NPC");
         int corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
         int policeLayer = 1 << LayerMask.NameToLayer("POLICE");
         int uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
+
+        int count = Physics.OverlapSphereNonAlloc(corpse.transform.position, 3f, colls, npcLayer);
 
         // 모든 레이어를 합친 후 전체에서 제외
         int layerMask = ~(npcLayer | corpseLayer | policeLayer | uninteractableLayer);

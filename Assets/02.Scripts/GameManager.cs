@@ -35,7 +35,8 @@ public class GameManager : MonoBehaviour
         if (police != null)
         {
             // 경찰 출동 없이 쫓던 거나 계속 쫓음
-            police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, policeCount);
+            //police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
+            police.GetComponent<PoliceController2>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
         }
         else
         {
