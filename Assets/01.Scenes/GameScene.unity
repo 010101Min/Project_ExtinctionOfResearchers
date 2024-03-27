@@ -136,6 +136,7 @@ GameObject:
   - component: {fileID: 82545544}
   - component: {fileID: 82545542}
   - component: {fileID: 82545541}
+  - component: {fileID: 82545547}
   m_Layer: 10
   m_Name: Police
   m_TagString: Police
@@ -150,11 +151,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 82545540}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71855e5a91487704a96c1d2c554979b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  state: 0
 --- !u!195 &82545542
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -242,6 +244,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &82545547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 82545540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f028dec478af864e91f27d5bc3af830, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  state: 0
+  Corpse: []
 --- !u!1 &210765667
 GameObject:
   m_ObjectHideFlags: 0

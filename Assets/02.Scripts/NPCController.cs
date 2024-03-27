@@ -127,7 +127,7 @@ public class NPCController : MonoBehaviour
             }
         }
     }
-    
+
     // 도발시 불러올 함수
     public void CheckProvoked(int percent)
     {
@@ -238,7 +238,7 @@ public class NPCController : MonoBehaviour
         agent.enabled = false;
         fStateTime = Random.Range(5f, 50f);
         yield return new WaitForSeconds(fStateTime);
-        
+
         oldState = state;
         idleCoroutine = null;
         int nextState = Random.Range(1, 101);
@@ -256,11 +256,12 @@ public class NPCController : MonoBehaviour
         float variZ = Random.Range(-8f, 8f);
         Vector3 dest = new Vector3(pos[movePos].position.x + variX, 0f, pos[movePos].position.z + variZ);
 
-        while ((transform.position - dest).magnitude >= 0.1f) {
+        while ((transform.position - dest).magnitude >= 0.1f)
+        {
             agent.SetDestination(dest);
             yield return null;
         }
-        
+
         oldState = state;
         moveCoroutine = null;
         int nextState = Random.Range(1, 101);
@@ -324,7 +325,7 @@ public class NPCController : MonoBehaviour
 
         // 신고할 위치 결정
         GameObject dest = findPlace();
-        
+
         // 의심할 캐릭터 결정
         // 만약 의심할 캐릭터가 없다면 자기 자신을 의심 (경찰 신고 시 신고자와 용의자 모두 받도록...)
         Collider[] colls = new Collider[13];
@@ -364,14 +365,14 @@ public class NPCController : MonoBehaviour
             }
             if (distToPlayer - 1 >= distToTarget) Suspect = player;
         }
-        
+
         agent.enabled = false;
 
         // NPC - 시신 - 용의자 선 긋기
         fDrawLine(this.transform, corpse.transform);
         if (Suspect != this.gameObject) { fDrawLine(corpse.transform, Suspect.transform); }
         yield return new WaitForSeconds(0.5f);
-        
+
         agent.enabled = true;
         agent.speed = 5.6f;
 

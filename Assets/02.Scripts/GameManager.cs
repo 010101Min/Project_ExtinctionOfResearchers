@@ -21,12 +21,12 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        
+
     }
 
     void Update()
     {
-        
+
     }
 
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect)
@@ -36,11 +36,16 @@ public class GameManager : MonoBehaviour
         {
             // 경찰 출동 없이 쫓던 거나 계속 쫓음
             //police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
-            police.GetComponent<PoliceController2>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
+            police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
         }
         else
         {
             // 경찰 출동
         }
+    }
+
+    public void DestroyShortCut(GameObject shortCut)
+    {
+        // 엔지니어에게 전달
     }
 }
