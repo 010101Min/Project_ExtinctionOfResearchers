@@ -8,11 +8,31 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 10f;
     public float turnSpeed = 120f;
+    private bool isChased = false;
+
+    GameObject nearestNPC = null;
+    GameObject nearestBomb = null;
+    GameObject nearestWindow = null;
+    GameObject nearestShortcut = null;
     Transform tr;
+
+    int npcLayer;
+    int bombLayer;
+    int windowLayer;
+    int shortcutLayer;
+    int corpseLayer;
+    int uninteractableLayer;
 
     void Start()
     {
         tr = GetComponent<Transform>();
+
+        npcLayer = 1 << LayerMask.NameToLayer("NPC");
+        bombLayer = 1 << LayerMask.NameToLayer("BOMB");
+        windowLayer = 1 << LayerMask.NameToLayer("WINDOW");
+        shortcutLayer = 1 << LayerMask.NameToLayer("SHORTCUT");
+        corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
+        uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
     }
 
     void Update()
@@ -25,20 +45,82 @@ public class PlayerController : MonoBehaviour
         tr.Translate(moveDirection * moveSpeed * Time.deltaTime);
         tr.Rotate(Vector3.up * turnSpeed * Time.deltaTime * r);
 
-        if (Input.GetKeyDown(KeyCode.E)) { killNpc(findNpc()); }
-        if (Input.GetKeyDown(KeyCode.Q)) { provokeNpc(findNpc()); }
+        findObject(out nearestNPC, out nearestBomb, out nearestWindow, out nearestShortcut);
+
+        if (nearestNPC != null)
+        {
+            // E, Q 키 작동 가능하다고 UI에 띄우기
+            
+        }
+        if (nearestBomb != null)
+        {
+            // 함정 작동 가능하다고 UI에 띄우기
+
+        }
+        if (nearestWindow != null)
+        {
+            // 은닉처 작동 가능하다고 UI에 띄우기
+
+        }
+        if (nearestShortcut != null)
+        {
+            // 지름길 작동 가능하다고 UI에 띄우기
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
+                Transform newTrans = nearestShortcut.GetComponent<ShortCutController>().UseShortCut(this.gameObject);
+                if (newTrans != null)
+                {
+                    this.gameObject.transform.position = newTrans.position;
+                    this.gameObject.transform.rotation = newTrans.rotation;
+                }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.E)) { killNpc(nearestNPC); }
+        if (Input.GetKeyDown(KeyCode.Q)) { provokeNpc(nearestNPC); }
+    }
+
+    void findObject(out GameObject nearestNPC, out GameObject nearestBomb, out GameObject nearestWindow, out GameObject nearestShortcut)
+    {
+        
+        Collider[] colls = new Collider[10];
+        List<GameObject> bombs = new List<GameObject>();
+        List<GameObject> windows = new List<GameObject>();
+        List<GameObject> shortcuts = new List<GameObject>();
+
+        int count = Physics.OverlapSphereNonAlloc(this.transform.position, 4f, colls, (bombLayer | windowLayer | shortcutLayer));   // 탐지해야 할 것 : 함정, 은닉처, 지름길
+
+        if (count > 0)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Vector3 dir = (colls[i].transform.position - transform.position).normalized;
+
+                float distToTarget = Vector3.Distance(transform.position, colls[i].transform.position);
+                if (!Physics.Raycast(transform.position, dir, distToTarget, ~(npcLayer | corpseLayer | uninteractableLayer | bombLayer | windowLayer | shortcutLayer)))   // 공격 대상과 플레이어 사이에 있어도 되는 것: 다른 npc, 시신(corpse, uninteractable)
+                {
+                    if (colls[i].CompareTag("Bomb")) { bombs.Add(colls[i].gameObject); }
+                    if (colls[i].CompareTag("Window")) { windows.Add(colls[i].gameObject); }
+                    if (colls[i].CompareTag("ShortCut")) { shortcuts.Add(colls[i].gameObject); }
+                }
+            }
+        }
+        // 행동 가능 범위 내에 있는 npc, 함정, 은닉처, 지름길들 중 가장 가까운 애 찾기
+        nearestBomb = findNearest(bombs);
+        nearestWindow = findNearest(windows);
+        nearestShortcut = findNearest(shortcuts);
+        nearestNPC = findNpc();
     }
 
     GameObject findNpc()
     {
-        int layer = 1 << LayerMask.NameToLayer("NPC");
-        float minDistance = float.MaxValue;
-        Collider[] colls = new Collider[13];
-        List<GameObject> targets = new List<GameObject>();
-        GameObject target = null;
 
-        // 행동 가능 범위 내에 npc 있는지 확인
-        int count = Physics.OverlapSphereNonAlloc(this.transform.position, 2f, colls, 1 << 9);
+        Collider[] colls = new Collider[20];
+        List<GameObject> npcs = new List<GameObject>();
+
+        // npc가 있는지 확인
+        int count = Physics.OverlapSphereNonAlloc(this.transform.position, 2f, colls, npcLayer);   // 탐지해야 할 것 : NPC
+
         if (count > 0)
         {
             for (int i = 0; i < count; i++)
@@ -48,29 +130,14 @@ public class PlayerController : MonoBehaviour
                 if (Vector3.Angle(transform.forward, dir) < 60f)    // 전방 좌우 60도가 공격 가능 범위
                 {
                     float distToTarget = Vector3.Distance(transform.position, colls[i].transform.position);
-                    if (!Physics.Raycast(transform.position, dir, distToTarget, ~layer))   // 공격 대상과 플레이어 사이에 벽 없음
+                    if (!Physics.Raycast(transform.position, dir, distToTarget, ~(npcLayer | corpseLayer | uninteractableLayer)))   // 공격 대상과 플레이어 사이에 있어도 되는 것: 다른 npc, 시신(corpse, uninteractable)
                     {
-                        targets.Add(colls[i].gameObject);
+                        if (colls[i].CompareTag("NPC")) { if (!colls[i].gameObject.GetComponent<NPCController>().isDead) npcs.Add(colls[i].gameObject); }
                     }
                 }
             }
         }
-
-        // 행동 가능 범위 내에 있는 npc들 중 가장 가까운 애 찾기
-        if (targets.Count > 0)
-        {
-            for (int i = 0; i < targets.Count; i++)
-            {
-                float distance = Vector3.Distance(transform.position, targets[i].transform.position);
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    target = targets[i];
-                }
-            }
-            return target;
-        }
-        return null;
+        return(findNearest(npcs));
     }
 
     void killNpc(GameObject target)
@@ -85,4 +152,36 @@ public class PlayerController : MonoBehaviour
         if (target != null) { target.GetComponent<NPCController>().CheckProvoked(rand); }
         else { Debug.Log("타겟 없음"); }
     }
+
+    GameObject findNearest(List<GameObject> lists)
+    {
+        float minDistance = float.MaxValue;
+        GameObject nearestItem = null;
+        if (lists.Count > 0)
+        {
+            nearestItem = lists[0];
+            for (int i = 0; i < lists.Count; i++)
+            {
+                float distance = Vector3.Distance(transform.position, lists[i].transform.position);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    nearestItem = lists[i];
+                }
+            }
+            if (nearestItem.CompareTag("ShortCut")) { nearestItem = nearestItem.transform.parent.gameObject; }
+        }
+        return nearestItem;
+    }
+    public void inChased()
+    {
+        isChased = true;
+        // 플레이어 위에 수갑 아이콘 띄우기
+    }
+    public void outChased()
+    {
+        isChased = false;
+        // 플레이어 위에 수갑 아이콘 지우기
+    }
+    public bool getChased() { return isChased; }
 }

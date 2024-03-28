@@ -14,45 +14,93 @@ public class EngineerController : MonoBehaviour
     }
 
     public State state = State.WAIT;
+    public GameObject home;
 
     private float fSabotageTime = 0f;
 
-    public GameObject player;
     private NavMeshAgent agent;
     private Animator anim;
-    public Transform[] pos = new Transform[2];
 
-    private List<GameObject> ShortCuts = new List<GameObject>();
+    public List<GameObject> ShortCuts = new List<GameObject>();
 
     void Start()
     {
+        this.gameObject.transform.position = home.transform.position;
         agent = GetComponent<NavMeshAgent>();
         agent.speed = 7f;
     }
 
-    // COME 상태 구현
+    public void Report(GameObject shortcut)
+    {
+        ShortCuts.Add(shortcut);
+        StopCoroutine(cCome());
+        StopCoroutine(cReturn());
+        StartCoroutine(cCome());
+    }
+
+    // Come 상태 구현
+    GameObject findNearestShortcut(List<GameObject> shortcuts)
+    {
+        GameObject minShortcut = ShortCuts[0];
+        float minDist = float.MaxValue;
+        foreach (GameObject shortcut in shortcuts)
+        {
+            float distance = Vector3.Distance(this.transform.position, shortcut.GetComponent<ShortCutController>().FindShortest(this.gameObject).transform.position);
+            if (distance <= minDist) { minShortcut = shortcut; }
+        }
+        return minShortcut;
+    }
     IEnumerator cCome()
     {
-        while (ShortCuts.Count >= 1)
+        GameObject destShortcut = findNearestShortcut(ShortCuts);
+        while (true)
         {
-            GameObject minShortcut = ShortCuts[0].GetComponent<ShortCutController>().FindShortest(this.gameObject);
-            float minDist = float.MaxValue;
-            foreach (GameObject shortcut in ShortCuts)
-            {
-                float distance = Vector3.Distance(this.transform.position, minShortcut.transform.position);
-                if (distance <= minDist) { minShortcut = shortcut; }
-            }
-            while (true)
-            {
-                agent.SetDestination(minShortcut.transform.position);
-                if ((transform.position - minShortcut.transform.position).magnitude <= 1f)
-                {
-                    //ShortCuts.Remove();
-                    agent.SetDestination(this.transform.position);
-                    break;
-                }
-                yield return null;
-            }
+            agent.SetDestination(destShortcut.GetComponent<ShortCutController>().FindShortest(this.gameObject).transform.position);
+            if ((transform.position - destShortcut.GetComponent<ShortCutController>().FindShortest(this.gameObject).transform.position).magnitude <= 1f) { break; }
+            yield return null;
+        }
+        StartCoroutine(cSabotage(destShortcut));
+    }
+
+    // Sabotage 상태 구현
+    IEnumerator cSabotage(GameObject shortcut)
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < 5f)
+        {
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        shortcut.GetComponent<ShortCutController>().fDestroy();
+        removeItems(shortcut);
+        if (ShortCuts.Count > 0) { StartCoroutine(cCome()); Debug.Log("남은 지름길 더 있음"); }
+        else { StartCoroutine(cReturn()); Debug.Log("남은 지름길 없음"); }
+    }
+    
+    // Return 상태 구현
+    IEnumerator cReturn()
+    {
+        while (true)
+        {
+            agent.SetDestination(home.transform.position);
+            if (Vector3.Distance(this.gameObject.transform.position, home.transform.position) <= 0.5f) { break; }
+            yield return null;
+        }
+        this.gameObject.transform.position = home.transform.position;
+    }
+
+    // Wait 상태 구현
+    void fWait()
+    {
+        StopAllCoroutines();
+    }
+
+    void removeItems(GameObject item)
+    {
+        for (int i = ShortCuts.Count - 1; i >= 0; i--)
+        {
+            if (ShortCuts[i] == item) { ShortCuts.RemoveAt(i); }
         }
     }
 }

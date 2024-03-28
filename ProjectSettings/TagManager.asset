@@ -8,13 +8,12 @@ TagManager:
   - Floor
   - NPC
   - Police
-  - Paramedic
-  - Engineer
   - Bomb
   - Window
   - Phone
   - PoliceCar
   - Uninteractable
+  - ShortCut
   layers:
   - Default
   - TransparentFX
@@ -31,8 +30,8 @@ TagManager:
   - BOMB
   - WINDOW
   - CORPSE
-  - 
-  - 
+  - SHORTCUT
+  - PLAYER
   - 
   - 
   - 

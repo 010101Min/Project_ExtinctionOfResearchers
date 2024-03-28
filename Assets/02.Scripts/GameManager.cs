@@ -12,6 +12,8 @@ public class GameManager : MonoBehaviour
     private int policeCount = 0;
 
     public GameObject policePrefab;
+    public GameObject engineer;
+    public GameObject policeCarPrefab;
 
     private void Awake()
     {
@@ -21,7 +23,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-
+        engineer = GameObject.Find("Engineer");
     }
 
     void Update()
@@ -41,11 +43,15 @@ public class GameManager : MonoBehaviour
         else
         {
             // 경찰 출동
+            GameObject policeCar = Instantiate(policeCarPrefab);
+            police = Instantiate(policePrefab, policeCar.transform.position, Quaternion.identity);
+            police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
         }
     }
 
     public void DestroyShortCut(GameObject shortCut)
     {
         // 엔지니어에게 전달
+        engineer.GetComponent<EngineerController>().Report(shortCut);
     }
 }

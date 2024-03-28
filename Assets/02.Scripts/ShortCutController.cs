@@ -6,21 +6,26 @@ public class ShortCutController : MonoBehaviour
 {
     public GameObject pos1;
     public GameObject pos2;
+    public bool isUsable = true;
     private bool reported = false;
 
-    public void UseShortCut(bool isChased, ref GameObject player)
+    public Transform UseShortCut(GameObject player)
     {
+        bool isChased = player.GetComponent<PlayerController>().getChased();
         float dist1 = Vector3.Distance(pos1.transform.position, player.transform.position);
         float dist2 = Vector3.Distance(pos2.transform.position, player.transform.position);
 
-        GameObject usedPos = (dist1 > dist2) ? pos2 : pos1;
-        player.transform.position = pos2.transform.position;
-
-        if (isChased && !reported)
+        GameObject destPos = (dist1 > dist2) ? pos1 : pos2;
+        
+        if (player.GetComponent<PlayerController>().getChased() && !reported)
         {
             // 게임 매니저에게 이거 부수라고 전달
+            GameManager.Instance.DestroyShortCut(this.gameObject);
             reported = true;
+            Debug.Log("전달했당");
         }
+
+        return destPos.transform;
     }
 
     public GameObject FindShortest(GameObject engineer)
@@ -32,8 +37,12 @@ public class ShortCutController : MonoBehaviour
         return usedPos;
     }
 
-    public void Destroyed()
+    public void fDestroy()
     {
-        gameObject.tag = "Uninteractable";
+        pos1.gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
+        pos1.gameObject.tag = "Uninteractable";
+        pos2.gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
+        pos2.gameObject.tag = "Uninteractable";
+        isUsable = false;
     }
 }

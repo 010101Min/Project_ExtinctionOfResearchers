@@ -28,13 +28,14 @@ public class PoliceController : MonoBehaviour
 
     private int chaseTime = 0;
     private bool isDead = false;
-    private bool isDetected = false;
+    public bool isDetected = false;
     private bool isCarriable = false;
 
     int npcLayer;
     int corpseLayer;
     int policeLayer;
     int uninteractableLayer;
+    int playerLayer;
     int layerMask;
 
     bool chaseCoroutine = false;
@@ -52,8 +53,9 @@ public class PoliceController : MonoBehaviour
         corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
         policeLayer = 1 << LayerMask.NameToLayer("POLICE");
         uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
+        playerLayer = 1 << LayerMask.NameToLayer("PLAYER");
 
-        layerMask = ~(npcLayer | corpseLayer | policeLayer | uninteractableLayer);
+        layerMask = ~(npcLayer | corpseLayer | policeLayer | uninteractableLayer | playerLayer);
     }
 
     void Update()
@@ -80,7 +82,7 @@ public class PoliceController : MonoBehaviour
     // 상태 바꾸는 함수
     void ChangeState(State newState)
     {
-        Debug.Log($"상태 변경... {state} -> {newState}");
+        //Debug.Log($"상태 변경... {state} -> {newState}");
         initCoroutine();
         state = newState;
 
@@ -129,6 +131,7 @@ public class PoliceController : MonoBehaviour
     public void fDead()
     {
         initCoroutine();
+        player.GetComponent<PlayerController>().outChased();
         isDead = true;
         agent.enabled = false;
         isCarriable = true;
@@ -182,7 +185,7 @@ public class PoliceController : MonoBehaviour
             if (Vector3.Angle(transform.forward, dirToCorpse) <= 90f)
             {
                 float distToCorpse = Vector3.Distance(transform.position, tempCorpse.transform.position);
-                if (!Physics.Raycast(transform.position, dirToCorpse, distToCorpse, layerMask))
+                if (!Physics.Raycast(transform.position, dirToCorpse, distToCorpse, ~(npcLayer | corpseLayer | policeLayer | uninteractableLayer | playerLayer)))
                 {
                     Debug.Log("시신 목격 " + tempCorpse.name);
                     Corpse.Add(tempCorpse);
@@ -201,7 +204,7 @@ public class PoliceController : MonoBehaviour
         Debug.Log("용의자 찾기 시작");
         GameObject tempSuspect = this.gameObject;
         Collider[] suspects = new Collider[13];
-        int count = Physics.OverlapSphereNonAlloc(corpse.transform.position, 5f, suspects, npcLayer);
+        int count = Physics.OverlapSphereNonAlloc(corpse.transform.position, 8f, suspects, npcLayer);
 
         float distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
         Vector3 dirToPlayer = (player.transform.position - corpse.transform.position).normalized;
@@ -210,7 +213,7 @@ public class PoliceController : MonoBehaviour
 
         if (count <= 0)
         {
-            if ((distToPlayer <= 4f) && (isPlayerInSight)) { Suspect = player; }
+            if ((distToPlayer <= 9f) && (isPlayerInSight)) { Suspect = player; }
             else { Suspect = this.gameObject; }
         }
         else
@@ -218,8 +221,7 @@ public class PoliceController : MonoBehaviour
             for (int i = 0; i < suspects.Length; i++)
             {
                 Vector3 dirToSuspect = (suspects[i].gameObject.transform.position - corpse.transform.position).normalized;
-                if (suspects[i] == null) Debug.Log("suspects[i] 가 문제 " + suspects[i].name + "count : " + count);
-                else if (corpse == null) Debug.Log("시신이 문제");
+                
                 float distToSuspect = Vector3.Distance(corpse.transform.position, suspects[i].gameObject.transform.position);
                 if (!Physics.Raycast(corpse.transform.position, dirToSuspect, distToSuspect, layerMask) && (distToSuspect <= minDist))
                 {
@@ -276,6 +278,7 @@ public class PoliceController : MonoBehaviour
         agent.speed = 10f;
         float elapsedTime = 0f;
         Debug.Log("추격 시작 / 추격 대상 : " + Suspect.name);
+        if (Suspect.Equals(player)) { player.GetComponent<PlayerController>().inChased(); }
 
         while ((elapsedTime < chaseTime) && (Suspect != null))
         {
@@ -325,10 +328,11 @@ public class PoliceController : MonoBehaviour
                     agent.SetDestination(this.transform.position);
                     break;
                 }
-                if (state == State.CHASE) { yield break; }
+                if ((state == State.CHASE) || (state == State.WAIT)) { yield break; }
                 yield return null;
             }
         }
+        if (Suspect == player) { player.GetComponent<PlayerController>().outChased(); }
         ChangeState(State.RETURN);
     }
     // Return 상태 구현
@@ -342,7 +346,7 @@ public class PoliceController : MonoBehaviour
         while ((transform.position - policeCar.transform.position).magnitude >= 1f)
         {
             agent.SetDestination(policeCar.transform.position);
-            if (state == State.CHASE) { yield break; }
+            if ((state == State.CHASE) || (state == State.WAIT)) { yield break; }
             yield return null;
         }
         transform.position = policeCar.transform.position;
