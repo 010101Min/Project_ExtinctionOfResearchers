@@ -40,10 +40,7 @@ public class NPCController : MonoBehaviour
 
     int npcLayer;
     int corpseLayer;
-    int policeLayer;
-    int uninteractableLayer;
-    int playerLayer;
-    int layerMask;
+    int wallLayer;
 
     public GameObject player;
     private NavMeshAgent agent;
@@ -68,10 +65,7 @@ public class NPCController : MonoBehaviour
 
         npcLayer = 1 << LayerMask.NameToLayer("NPC");
         corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
-        policeLayer = 1 << LayerMask.NameToLayer("POLICE");
-        uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
-        playerLayer = 1 << LayerMask.NameToLayer("PLAYER");
-        layerMask = ~(npcLayer | policeLayer | uninteractableLayer);
+        wallLayer = 1 << LayerMask.NameToLayer("WALL");
     }
 
     void Update()
@@ -121,17 +115,17 @@ public class NPCController : MonoBehaviour
     // 시야 확인 (시신만 봄, 함수 불러오기 전 Witnessable 체크 필요)
     void CheckVision()
     {
-        Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, 7f, corpseLayer);
+        Collider[] targets = Physics.OverlapSphere(transform.position, 7f, corpseLayer);
 
-        for (int i = 0; i < targetsInViewRadius.Length; i++)
+        for (int i = 0; i < targets.Length; i++)
         {
-            GameObject target = targetsInViewRadius[i].gameObject;
-            Vector3 dirToTarget = (target.transform.position - transform.position).normalized;
+            GameObject target = targets[i].gameObject;
+            Vector3 dirToTarget = (target.transform.position - this.transform.position).normalized;
 
-            if (Vector3.Angle(transform.forward, dirToTarget) < 75f) // 좌우로 각각 75도가 시야각
+            if (Vector3.Angle(this.transform.forward, dirToTarget) < 75f) // 좌우로 각각 75도가 시야각
             {
-                float distToTarget = Vector3.Distance(transform.position, target.transform.position);
-                if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, ~(corpseLayer | uninteractableLayer | policeLayer | playerLayer)))   // 시신과의 거리 사이에 뭔가 방해물이 없음 (시신 확인)
+                float distToTarget = Vector3.Distance(this.transform.position, target.transform.position);
+                if (!Physics.Raycast(this.transform.position, dirToTarget, distToTarget, wallLayer)) // 시신과의 거리 사이에 뭔가 방해물이 없음 (시신 확인)
                 {
                     Corpse = target;
                     oldState = state;
@@ -203,6 +197,7 @@ public class NPCController : MonoBehaviour
     // 구속시 불러올 함수
     public void fArrested()
     {
+        initCoroutine();
         agent.enabled = false;
         witnessable = false;
         fProvoke = 0;
@@ -236,6 +231,7 @@ public class NPCController : MonoBehaviour
 
         while (elapsedTime < 0.5f)
         {
+            if (!witnessable) { break; }
             lineRenderer.SetPosition(0, startPoint.position);
             lineRenderer.SetPosition(1, endPoint.position);
             elapsedTime += Time.deltaTime;
@@ -308,14 +304,14 @@ public class NPCController : MonoBehaviour
 
     // Report 상태 구현
     private void fReport(GameObject corpse) { initCoroutine(); reportCoroutine = StartCoroutine(cReport(corpse)); }
-    // 신고할 위치 찾는 함수
-    private GameObject findPlace()
+    private GameObject findPlace(ref bool isPoliceExist, bool tempProvokable)
     {
         float minDistance = float.MaxValue;
         GameObject dest = this.gameObject;
         GameObject Police = GameObject.FindGameObjectWithTag("Police");
         if (Police == null)
         {
+            if (isPoliceExist) { fGiveUp(tempProvokable); }
             GameObject[] phones = GameObject.FindGameObjectsWithTag("Phone");
             minDistance = float.MaxValue;
             for (int i = 0; i < phones.Length; i++)
@@ -328,77 +324,32 @@ public class NPCController : MonoBehaviour
                 }
             }
         }
-        else { dest = Police; }
-        return dest;
-    }
-    IEnumerator cReport(GameObject corpse)
-    {
-        bool tempProvokable = provokable;
-        provokable = false;
-
-        GameObject dest = null;
-        bool isPoliceExist = (GameObject.FindGameObjectWithTag("Police") == null) ? true : false;
-
-        // 의심할 캐릭터 결정
-        // 만약 의심할 캐릭터가 없다면 자기 자신을 의심 (경찰 신고 시 신고자와 용의자 모두 받도록...)
-        Collider[] colls = new Collider[13];
-
-        // 각 레이어의 마스크 생성
-        int count = Physics.OverlapSphereNonAlloc(corpse.transform.position, 3f, colls, npcLayer);
-
-        float distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
-        Vector3 dirToPlayer = (player.transform.position - corpse.transform.position).normalized;
-        bool isPlayerInSight = !(Physics.Raycast(transform.position, dirToPlayer, distToPlayer, layerMask));
-        float distToTarget = float.MaxValue;
-
-        if (count <= 0)
-        {
-            if ((distToPlayer <= 6f) && isPlayerInSight) { Suspect = player; }
-            else { Suspect = this.gameObject; }
-        }
         else
         {
-            for (int i = 0; i < count; i++)
-            {
-                Vector3 dirToTarget = (colls[i].gameObject.transform.position - corpse.transform.position).normalized;
-                float distCurrent = Vector3.Distance(corpse.transform.position, colls[i].gameObject.transform.position);
-                if (!Physics.Raycast(transform.position, dirToTarget, distCurrent, layerMask) && (distCurrent <= distToTarget))   // NPC-용의자 사이에 벽이 없음
-                {
-                    distToTarget = distCurrent;
-                    Suspect = colls[i].gameObject;
-                }
-            }
-            if (distToPlayer - 1 >= distToTarget) Suspect = player;
+            dest = Police;
+            isPoliceExist = true;
         }
-
-        agent.enabled = false;
-
-        // NPC - 시신 - 용의자 선 긋기
-        fDrawLine(this.transform, corpse.transform);
-        if (Suspect != this.gameObject) { fDrawLine(corpse.transform, Suspect.transform); }
-        yield return new WaitForSeconds(0.5f);
-
-        agent.enabled = true;
-        agent.speed = 5.6f;
-
-        while (true)
+        return dest;
+    }
+    private void fCheckDetected(GameObject corpse, GameObject suspect, bool tempProvokable)
+    {
+        if (corpse.CompareTag("NPC"))
         {
-            dest = findPlace();
-            // 만약 신고 시작할 시점에 경찰이 있었는데 중간에 사라지면 신고 안 하고 포기
-            //if ((isPoliceExist) && !(dest.CompareTag("Police"))) break;
-            if ((transform.position - dest.transform.position).magnitude <= 2.5f) break;
-            agent.SetDestination(dest.transform.position);
-            yield return null;
+            if (corpse.gameObject.GetComponent<NPCController>().isDetected)
+            {
+                if (suspect == null) { fGiveUp(tempProvokable); }
+            }
         }
-
-        // 여기에 게임매니저로 신고하는 코드 (신고 직전 isDetected 체크)
-        // 신고할 위치에 가장 먼저 도착한 한 명만 신고하도록
-        GameManager.Instance.Report(this.gameObject, corpse.gameObject, Suspect.gameObject);
-        if (corpse.CompareTag("NPC")) corpse.gameObject.GetComponent<NPCController>().fDetected();
-        if (corpse.CompareTag("Police")) corpse.gameObject.GetComponent<PoliceController>().fDetected();
-        Debug.Log("Suspect : " + Suspect.gameObject.name + ", Corpse : " + corpse.gameObject.name);
-
-        // 원래대로 속성 돌리기
+        if (corpse.CompareTag("Police"))
+        {
+            if(corpse.gameObject.GetComponent<PoliceController>().isDetected)
+            {
+                if (suspect == null) { fGiveUp(tempProvokable); }
+            }
+        }
+    }
+    private void fGiveUp(bool tempProvokable)
+    {
         provokable = tempProvokable;
         agent.speed = 3.5f;
         Corpse = null;
@@ -406,6 +357,74 @@ public class NPCController : MonoBehaviour
         oldState = state;
         reportCoroutine = null;
         state = State.MOVE;
+    }
+    IEnumerator cReport(GameObject corpse)
+    {
+        bool tempProvokable = provokable;
+        provokable = false;
+
+        GameObject dest = null;
+        bool isPoliceExist = false;
+
+        // 의심할 캐릭터 결정
+        // 만약 의심할 캐릭터가 없다면 null을 의심 (경찰 신고 시 신고자와 용의자 모두 받도록...)
+        Collider[] colls = Physics.OverlapSphere(corpse.transform.position, 5f, npcLayer);
+
+        float distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
+        bool isPlayerInSight = !(Physics.Raycast(transform.position, (player.transform.position - this.transform.position).normalized, Vector3.Distance(this.transform.position, player.transform.position), wallLayer));
+        float distToTarget = 5f;
+
+        if (colls.Length <= 0)
+        {
+            if ((distToPlayer <= 6f) && isPlayerInSight) { Suspect = player; }
+            else { Suspect = null; }
+        }
+        else
+        {
+            for (int i = 0; i < colls.Length; i++)
+            {
+                Vector3 dirToTarget = (colls[i].gameObject.transform.position - corpse.transform.position).normalized;
+                float distCurrent = Vector3.Distance(corpse.transform.position, colls[i].gameObject.transform.position);
+                if (!Physics.Raycast(transform.position, dirToTarget, distCurrent, wallLayer) && (distCurrent <= distToTarget))   // NPC-용의자 사이에 벽이 없음
+                {
+                    distToTarget = distCurrent;
+                    Suspect = colls[i].gameObject;
+                }
+            }
+            if (distToPlayer - 1 <= distToTarget) { Suspect = player; }
+            if (Suspect.Equals(this.gameObject)) { Suspect = null; }
+        }
+
+        agent.enabled = false;
+
+        // NPC - 시신 - 용의자 선 긋기
+        fDrawLine(this.transform, corpse.transform);
+        if (Suspect != null) { fDrawLine(corpse.transform, Suspect.transform); }
+        yield return new WaitForSeconds(0.5f);
+
+        agent.enabled = true;
+        agent.speed = 5.6f;
+
+        while (true)
+        {
+            // 만약 경찰이 있었는데 신고 하러 가는 도중에 사라지면 신고 안 하고 포기
+            dest = findPlace(ref isPoliceExist, tempProvokable);
+            fCheckDetected(corpse, Suspect, tempProvokable);
+            if (state == State.MOVE) yield break;
+            if ((transform.position - dest.transform.position).magnitude <= 2.5f) break;
+            agent.SetDestination(dest.transform.position);
+            yield return null;
+        }
+
+        // 여기에 게임매니저로 신고하는 코드 (신고 직전 isDetected 체크)
+        // 신고할 위치에 가장 먼저 도착한 한 명만 신고하도록
+        GameManager.Instance.Report(this.gameObject, corpse, Suspect);
+        if (corpse.CompareTag("NPC")) corpse.GetComponent<NPCController>().fDetected();
+        if (corpse.CompareTag("Police")) corpse.GetComponent<PoliceController>().fDetected();
+        //Debug.Log("Suspect : " + Suspect.gameObject.name + ", Corpse : " + corpse.gameObject.name);
+
+        // 원래대로 속성 돌리기
+        fGiveUp(tempProvokable);
     }
 
     // Provoked 상태 구현

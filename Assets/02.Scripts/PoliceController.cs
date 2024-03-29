@@ -33,10 +33,8 @@ public class PoliceController : MonoBehaviour
 
     int npcLayer;
     int corpseLayer;
-    int policeLayer;
     int uninteractableLayer;
-    int playerLayer;
-    int layerMask;
+    int wallLayer;
 
     bool chaseCoroutine = false;
     bool resolveCoroutine = false;
@@ -51,11 +49,8 @@ public class PoliceController : MonoBehaviour
 
         npcLayer = 1 << LayerMask.NameToLayer("NPC");
         corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
-        policeLayer = 1 << LayerMask.NameToLayer("POLICE");
         uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
-        playerLayer = 1 << LayerMask.NameToLayer("PLAYER");
-
-        layerMask = ~(npcLayer | corpseLayer | policeLayer | uninteractableLayer | playerLayer);
+        wallLayer = 1 << LayerMask.NameToLayer("WALL");
     }
 
     void Update()
@@ -158,9 +153,11 @@ public class PoliceController : MonoBehaviour
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect, int time)
     {
         chaseTime = time;
-        Debug.Log("신고 들어옴 신고자 : " + reporter.name + "용의자 : " + suspect.name + ", 시신 : " + corpse);
+        if (suspect != null) { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : " + corpse); }
+        else { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse); }
+
         Corpse.Add(corpse);
-        if ((suspect == reporter) || (suspect == null))
+        if (suspect == null)
         {
             if ((state == State.WAIT) || (state == State.RETURN)) ChangeState(State.RESOLVE);
         }
@@ -185,7 +182,7 @@ public class PoliceController : MonoBehaviour
             if (Vector3.Angle(transform.forward, dirToCorpse) <= 90f)
             {
                 float distToCorpse = Vector3.Distance(transform.position, tempCorpse.transform.position);
-                if (!Physics.Raycast(transform.position, dirToCorpse, distToCorpse, ~(npcLayer | corpseLayer | policeLayer | uninteractableLayer | playerLayer)))
+                if (!Physics.Raycast(transform.position, dirToCorpse, distToCorpse, wallLayer))
                 {
                     Debug.Log("시신 목격 " + tempCorpse.name);
                     Corpse.Add(tempCorpse);
@@ -193,29 +190,23 @@ public class PoliceController : MonoBehaviour
                     // Chase 중이었다면 타겟 바꾸지 않고 계속 추격, Chase 중이 아니었다면 용의자 추적
                     if (tempCorpse.CompareTag("NPC")) tempCorpse.GetComponent<NPCController>().fDetected();
                     if (tempCorpse.CompareTag("Police")) tempCorpse.GetComponent<PoliceController>().fDetected();
-                    if (state != State.CHASE) { FindSuspect(tempCorpse); }
+                    if (state != State.CHASE) { StartCoroutine(FindSuspect(tempCorpse)); }
                 }
             }
         }
     }
     // 용의자 찾는 함수
-    void FindSuspect(GameObject corpse)
+    IEnumerator FindSuspect(GameObject corpse)
     {
         Debug.Log("용의자 찾기 시작");
-        GameObject tempSuspect = this.gameObject;
-        Collider[] suspects = new Collider[13];
-        int count = Physics.OverlapSphereNonAlloc(corpse.transform.position, 8f, suspects, npcLayer);
+        GameObject tempSuspect = null;
+        Collider[] suspects = Physics.OverlapSphere(corpse.transform.position, 8f, npcLayer);
 
         float distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
-        Vector3 dirToPlayer = (player.transform.position - corpse.transform.position).normalized;
-        bool isPlayerInSight = !(Physics.Raycast(transform.position, dirToPlayer, distToPlayer, layerMask));
-        float minDist = float.MaxValue;
+        bool isPlayerInSight = !(Physics.Raycast(transform.position, (player.transform.position - this.transform.position).normalized, Vector3.Distance(this.transform.position, player.transform.position), wallLayer));
+        float minDist = 8f;
 
-        if (count <= 0)
-        {
-            if ((distToPlayer <= 9f) && (isPlayerInSight)) { Suspect = player; }
-            else { Suspect = this.gameObject; }
-        }
+        if (suspects.Length <= 0) { if ((distToPlayer <= 9f) && (isPlayerInSight)) { tempSuspect = player; } }
         else
         {
             for (int i = 0; i < suspects.Length; i++)
@@ -223,24 +214,24 @@ public class PoliceController : MonoBehaviour
                 Vector3 dirToSuspect = (suspects[i].gameObject.transform.position - corpse.transform.position).normalized;
                 
                 float distToSuspect = Vector3.Distance(corpse.transform.position, suspects[i].gameObject.transform.position);
-                if (!Physics.Raycast(corpse.transform.position, dirToSuspect, distToSuspect, layerMask) && (distToSuspect <= minDist))
+                if (!Physics.Raycast(corpse.transform.position, dirToSuspect, distToSuspect, wallLayer) && (distToSuspect <= minDist))
                 {
                     minDist = distToSuspect;
                     tempSuspect = suspects[i].gameObject;
                 }
             }
-            if (distToPlayer - 1 >= minDist) tempSuspect = player;
-            Suspect = tempSuspect;
-            Debug.Log("용의자 : " + Suspect.name);
+            if (distToPlayer - 2 <= minDist) tempSuspect = player;
+            Debug.Log("용의자 : " + tempSuspect.name);
         }
 
         fDrawLine(this.transform, corpse.transform);
         if (tempSuspect != null)
         {
-            fDrawLine(corpse.transform, Suspect.transform);
-            Report(this.gameObject, corpse, Suspect, chaseTime);
+            fDrawLine(corpse.transform, tempSuspect.transform);
+            Report(this.gameObject, corpse, tempSuspect, chaseTime);
         }
         else { Debug.Log("용의자 못 찾음"); }
+        yield return null;
     }
     // 선 긋는 함수
     void fDrawLine(Transform startPoint, Transform endPoint) { StartCoroutine(cDrawLine(startPoint, endPoint)); }
@@ -342,11 +333,11 @@ public class PoliceController : MonoBehaviour
         chaseCoroutine = false;
         resolveCoroutine = false;
         returnCoroutine = true;
-        agent.speed = 6f;
+        agent.speed = 5f;
         while ((transform.position - policeCar.transform.position).magnitude >= 1f)
         {
             agent.SetDestination(policeCar.transform.position);
-            if ((state == State.CHASE) || (state == State.WAIT)) { yield break; }
+            if ((state == State.CHASE) || (state == State.WAIT) || (state == State.RESOLVE)) { yield break; }
             yield return null;
         }
         transform.position = policeCar.transform.position;
@@ -360,5 +351,6 @@ public class PoliceController : MonoBehaviour
         chaseCoroutine = false;
         resolveCoroutine = false;
         returnCoroutine = false;
+        Destroy(this.gameObject);
     }
 }

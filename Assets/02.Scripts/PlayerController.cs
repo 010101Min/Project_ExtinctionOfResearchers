@@ -55,7 +55,11 @@ public class PlayerController : MonoBehaviour
         if (nearestBomb != null)
         {
             // 함정 작동 가능하다고 UI에 띄우기
-
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
+                if (nearestBomb.GetComponent<BombController>() != null) { nearestBomb.GetComponent<BombController>().UseBomb(); }
+            }
+            
         }
         if (nearestWindow != null)
         {
@@ -88,7 +92,7 @@ public class PlayerController : MonoBehaviour
         List<GameObject> windows = new List<GameObject>();
         List<GameObject> shortcuts = new List<GameObject>();
 
-        int count = Physics.OverlapSphereNonAlloc(this.transform.position, 4f, colls, (bombLayer | windowLayer | shortcutLayer));   // 탐지해야 할 것 : 함정, 은닉처, 지름길
+        int count = Physics.OverlapSphereNonAlloc(this.transform.position, 3f, colls, (bombLayer | windowLayer | shortcutLayer));   // 탐지해야 할 것 : 함정, 은닉처, 지름길
 
         if (count > 0)
         {
