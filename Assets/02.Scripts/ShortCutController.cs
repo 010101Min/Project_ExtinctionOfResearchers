@@ -19,10 +19,8 @@ public class ShortCutController : MonoBehaviour
         
         if (player.GetComponent<PlayerController>().getChased() && !reported)
         {
-            // 게임 매니저에게 이거 부수라고 전달
             GameManager.Instance.DestroyShortCut(this.gameObject);
             reported = true;
-            Debug.Log("전달했당");
         }
 
         return destPos.transform;

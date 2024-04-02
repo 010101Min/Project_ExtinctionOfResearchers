@@ -21,8 +21,8 @@ public class NPCController : MonoBehaviour
     private GameObject Suspect = null;
     public GameObject Corpse = null;
 
-    //public ScrollRect aliveState;
-    //public Image Poisoned;
+    public ScrollRect aliveState;
+    public Image Poisoned;
     //public Image Blinded;
     //public Image Sleeping;
     //public ScrollRect deadState;
@@ -39,7 +39,7 @@ public class NPCController : MonoBehaviour
     private bool witnessable = true;
 
     private float fStateTime = 0f;
-    private float fPoisoned = 0f;
+    public float fPoisoned = 0f;
     private int fProvoke = 0;
 
     int npcLayer;
@@ -71,8 +71,8 @@ public class NPCController : MonoBehaviour
         corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
 
-        //aliveState.gameObject.SetActive(false);
-        //Poisoned.gameObject.SetActive(false);
+        aliveState.gameObject.SetActive(true);
+        Poisoned.gameObject.SetActive(true);
         //Blinded.gameObject.SetActive(false);
         //Sleeping.gameObject.SetActive(false);
         //deadState.gameObject.SetActive(false);
@@ -193,6 +193,10 @@ public class NPCController : MonoBehaviour
         witnessable = true;
         gameObject.layer = LayerMask.NameToLayer("NPC");
     }
+
+    // 독 사용시 불러올 함수
+    public float fGetPoisoned() { return fPoisoned; }
+    public void fSetPoisoned(float percent) { fPoisoned =  percent; }
 
     // 시신 발견시 불러올 함수
     public void fDetected()

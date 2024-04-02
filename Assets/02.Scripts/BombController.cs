@@ -12,6 +12,9 @@ public class BombController : MonoBehaviour
     private GameObject player;
     private bool isUsable = true;
     float explosionTimer = 10f;
+    float blindTimer = 20f;
+    float poisonTimer = 30f;
+    float poisonedTimer = 15f;
     public State state;
 
     public enum State
@@ -49,13 +52,13 @@ public class BombController : MonoBehaviour
         }
     }
 
+    // 공통 함수
     // 폭발 후 못 쓰게 됨
     private void AfterExplosion()
     {
         // 여기에 뭐... 이미지 바뀌고 하는 거
         Destroy(gameObject);
     }
-
     // 못 쓰게 할 함수
     private void AfterUse()
     {
@@ -63,6 +66,7 @@ public class BombController : MonoBehaviour
         this.gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
     }
 
+    // 폭발물 함수
     // 폭발 전 카운트다운
     IEnumerator cBombUse()
     {
@@ -114,6 +118,7 @@ public class BombController : MonoBehaviour
         AfterExplosion();
     }
 
+    // 소화기 함수
     IEnumerator cFireUse()
     {
         float timer = 0f;
@@ -149,7 +154,7 @@ public class BombController : MonoBehaviour
 
             CountBar.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
             timer += Time.deltaTime;
-            CountBar.fillAmount = Mathf.Lerp(1f, 0f, timer / 30f);
+            CountBar.fillAmount = Mathf.Lerp(1f, 0f, timer / blindTimer);
             yield return null;
         }
 
@@ -158,6 +163,54 @@ public class BombController : MonoBehaviour
         Collider[] blindcorpses = Physics.OverlapSphere(transform.position, 10f, invisiblecorpseLayer);
         for (int i = 0; i < blindcorpses.Length; i++) { blindcorpses[i].gameObject.layer = LayerMask.NameToLayer("CORPSE"); }
     }
+
+    // 독 함수
+    IEnumerator cPoisonUse()
+    {
+        float timer = 0f;
+        int npcLayer = 1 << LayerMask.NameToLayer("NPC");
+        int invisiblenpcLayer = 1 << LayerMask.NameToLayer("INVISIBLENPC");
+        int wallLayer = 1 << LayerMask.NameToLayer("WALL");
+        CountBar.fillAmount = 1f;
+
+        while (CountBar.fillAmount > 0)
+        {
+            Collider[] targets1 = Physics.OverlapSphere(transform.position, 12f, (npcLayer | invisiblenpcLayer));
+            for (int i = 0; i < targets1.Length; i++)
+            {
+                GameObject target = targets1[i].gameObject;
+                Vector3 dirToTarget = (target.transform.position - transform.position).normalized;
+                float distToTarget = Vector3.Distance(transform.position, target.transform.position);
+                if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, wallLayer) && (distToTarget <= 10f)) { StartCoroutine(cPoison(target.gameObject)); }    // NPC 중독
+                else { StopCoroutine(cPoison(target.gameObject)); }    // NPC 중독 회복
+            }
+            CountBar.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
+            timer += Time.deltaTime;
+            CountBar.fillAmount = Mathf.Lerp(1f, 0f, timer / poisonTimer);
+            yield return null;
+        }
+
+        Collider[] poisonednpcs = Physics.OverlapSphere(transform.position, 12f, (npcLayer | invisiblenpcLayer));
+        for (int i = 0; i < poisonednpcs.Length; i++) { StopCoroutine(cPoison(poisonednpcs[i].gameObject)); }
+    }
+    // 독 함수 (개인)
+    IEnumerator cPoison(GameObject npc)
+    {
+        float timer = npc.GetComponent<NPCController>().fGetPoisoned() * poisonedTimer; // 이전 중독 상태에 따라 타이머 시작값 설정
+        float poisonedPercent = npc.GetComponent<NPCController>().fGetPoisoned();
+        float percent = 0;
+        while (poisonedPercent <= 1)
+        {
+            timer += Time.deltaTime;
+            float normalizedTimer = Mathf.Clamp(timer / poisonedTimer, 0f, 1f); // 타이머 값을 0과 1 사이로 정규화
+            percent = Mathf.Lerp(1f, 0f, normalizedTimer);
+            npc.GetComponent<NPCController>().Poisoned.fillAmount = percent;    // 정규화된 타이머 값을 사용하여 fillAmount 설정
+            npc.GetComponent<NPCController>().fSetPoisoned(percent);
+            yield return null;
+        }
+        // 중독 완료
+    }
+
 
     // 폭발 범위 함수
     private void fFireExplosion()
