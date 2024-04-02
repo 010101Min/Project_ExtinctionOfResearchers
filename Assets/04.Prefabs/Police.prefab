@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2804768860873413229}
   - component: {fileID: 5318365435796782785}
   - component: {fileID: -9202951390946360237}
+  - component: {fileID: 4845790986132535916}
   m_Layer: 10
   m_Name: Police
   m_TagString: Police
@@ -99,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   Corpse: []
+  isDetected: 0
 --- !u!195 &-9202951390946360237
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -121,3 +123,24 @@ NavMeshAgent:
   m_BaseOffset: 0.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!135 &4845790986132535916
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 658823264917967712}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}

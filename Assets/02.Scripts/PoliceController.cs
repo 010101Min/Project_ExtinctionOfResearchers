@@ -131,6 +131,7 @@ public class PoliceController : MonoBehaviour
         agent.enabled = false;
         isCarriable = true;
         gameObject.layer = LayerMask.NameToLayer("CORPSE");
+        //gameObject.tag = "NPC";
         state = State.DIE;
     }
     // 시신 발견시 불러올 함수

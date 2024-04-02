@@ -1,15 +1,23 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 public class BombController : MonoBehaviour
 {
     //public GameObject ExplosionEffect;
     public Image CountBar;
+    private GameObject player;
     private bool isUsable = true;
     float explosionTimer = 10f;
+
+    private void Start()
+    {
+        player = GameObject.FindGameObjectWithTag("Player");
+    }
 
     public void UseBomb()
     {
@@ -47,7 +55,16 @@ public class BombController : MonoBehaviour
         int wallLayer = 1 << LayerMask.NameToLayer("WALL");
 
         //Instantiate(ExplosionEffect, this.transform.position, Quaternion.identity);
-        Collider[] targets = Physics.OverlapSphere(transform.position, 10f, (npcLayer | policeLayer | playerLayer));
+
+        Collider[] targets = Physics.OverlapSphere(transform.position, 10f, (npcLayer | policeLayer));
+
+        Vector3 dirToPlayer = (player.transform.position - transform.position).normalized;
+        float distToPlayer = Vector3.Distance(transform.position, player.transform.position);
+        if (!Physics.Raycast(transform.position, dirToPlayer, distToPlayer, wallLayer))
+        {
+            Debug.Log("플레이어 사망");
+        }
+
         if (targets.Length == 0) { Debug.Log("아무도 없음"); }
         
         for (int i = 0; i < targets.Length; i++)
@@ -58,10 +75,7 @@ public class BombController : MonoBehaviour
             if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, wallLayer))   // 타겟과의 거리 사이에 벽 없음 (폭발 영향 확인)
             {
                 if (target.CompareTag("NPC")) { target.GetComponent<NPCController>().fDead(); }
-                //if (target.CompareTag("Police")) { target.GetComponent<PoliceController>().fDead(); Debug.Log("경찰 사망"); }
-                if (target.CompareTag("Police")) { Debug.Log("경찰 사망"); }
-                // 플레이어일시 플레이어도 사망
-                if (target.CompareTag("Player")) { Debug.Log("플레이어 사망"); }
+                if (target.CompareTag("Police")) { target.GetComponent<PoliceController>().fDead();}
             }
         }
         AfterExplosion();
