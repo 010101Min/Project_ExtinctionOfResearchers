@@ -134,6 +134,7 @@ public class NPCController : MonoBehaviour
             }
         }
     }
+    public bool isWitnessable() { return witnessable; }
 
     // 도발시 불러올 함수
     public void CheckProvoked(int percent)
@@ -214,30 +215,6 @@ public class NPCController : MonoBehaviour
         reportCoroutine = null;
         provokedCoroutine = null;
         sleepCoroutine = null;
-    }
-
-    // 선 긋는 함수
-    private void fDrawLine(Transform startPoint, Transform endPoint) { StartCoroutine(cDrawLine(startPoint, endPoint)); }
-    IEnumerator cDrawLine(Transform startPoint, Transform endPoint)
-    {
-        GameObject lineObject = new GameObject("LineObject");
-        LineRenderer lineRenderer = lineObject.AddComponent<LineRenderer>();
-
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.1f;
-        lineRenderer.material.color = Color.red;
-
-        float elapsedTime = 0f;
-
-        while (elapsedTime < 0.5f)
-        {
-            if (!witnessable) { break; }
-            lineRenderer.SetPosition(0, startPoint.position);
-            lineRenderer.SetPosition(1, endPoint.position);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-        Destroy(lineObject);
     }
 
     // IDLE 상태 구현
@@ -398,8 +375,8 @@ public class NPCController : MonoBehaviour
         agent.enabled = false;
 
         // NPC - 시신 - 용의자 선 긋기
-        fDrawLine(this.transform, corpse.transform);
-        if (Suspect != null) { fDrawLine(corpse.transform, Suspect.transform); }
+        LineController.Instance.DrawLine(this.gameObject, this.transform, corpse.transform);
+        if (Suspect != null) { LineController.Instance.DrawLine(this.gameObject, corpse.transform, Suspect.transform); }
         yield return new WaitForSeconds(0.5f);
 
         agent.enabled = true;

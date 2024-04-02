@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class BombController : MonoBehaviour
 {
     //public GameObject ExplosionEffect;
-    public Slider CountBar;
+    public Image CountBar;
     private bool isUsable = true;
     float explosionTimer = 10f;
 
@@ -25,12 +25,12 @@ public class BombController : MonoBehaviour
     {
         float timer = 0f;
         Debug.Log("함정 작동");
-        CountBar.value = 1f;
-        while (CountBar.value > 0)
+        CountBar.fillAmount = 1f;
+        while (CountBar.fillAmount > 0)
         {
             CountBar.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
             timer += Time.deltaTime;
-            CountBar.value = Mathf.Lerp(1f, 0f, timer / explosionTimer);
+            CountBar.fillAmount = Mathf.Lerp(1f, 0f, timer / explosionTimer);
             yield return null;
         }
         // 폭발

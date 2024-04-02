@@ -224,36 +224,14 @@ public class PoliceController : MonoBehaviour
             Debug.Log("용의자 : " + tempSuspect.name);
         }
 
-        fDrawLine(this.transform, corpse.transform);
+        LineController.Instance.DrawLine(this.gameObject, this.transform, corpse.transform);
         if (tempSuspect != null)
         {
-            fDrawLine(corpse.transform, tempSuspect.transform);
+            LineController.Instance.DrawLine(this.gameObject, corpse.transform, tempSuspect.transform);
             Report(this.gameObject, corpse, tempSuspect, chaseTime);
         }
         else { Debug.Log("용의자 못 찾음"); }
         yield return null;
-    }
-    // 선 긋는 함수
-    void fDrawLine(Transform startPoint, Transform endPoint) { StartCoroutine(cDrawLine(startPoint, endPoint)); }
-    IEnumerator cDrawLine(Transform startPoint, Transform endPoint)
-    {
-        GameObject lineObject = new GameObject("LineObject");
-        LineRenderer lineRenderer = lineObject.AddComponent<LineRenderer>();
-
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.1f;
-        lineRenderer.material.color = Color.red;
-
-        float elapsedTime = 0f;
-
-        while (elapsedTime < 0.5f)
-        {
-            lineRenderer.SetPosition(0, startPoint.position);
-            lineRenderer.SetPosition(1, endPoint.position);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-        Destroy(lineObject);
     }
 
     // Chase 상태 구현
