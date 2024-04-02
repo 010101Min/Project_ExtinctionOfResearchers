@@ -23,7 +23,7 @@ TagManager:
   - UI
   - WALL
   - FLOOR
-  - PLAYER
+  - 
   - NPC
   - POLICE
   - UNINTERACTABLE
@@ -32,8 +32,8 @@ TagManager:
   - CORPSE
   - SHORTCUT
   - PLAYER
-  - 
-  - 
+  - INVISIBLENPC
+  - INVISIBLECORPSE
   - 
   - 
   - 

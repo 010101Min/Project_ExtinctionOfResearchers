@@ -33,7 +33,6 @@ public class PoliceController : MonoBehaviour
 
     int npcLayer;
     int corpseLayer;
-    int uninteractableLayer;
     int wallLayer;
 
     bool chaseCoroutine = false;
@@ -49,7 +48,6 @@ public class PoliceController : MonoBehaviour
 
         npcLayer = 1 << LayerMask.NameToLayer("NPC");
         corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
-        uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
     }
 
@@ -134,11 +132,12 @@ public class PoliceController : MonoBehaviour
         //gameObject.tag = "NPC";
         state = State.DIE;
     }
+    public bool getDead() { return isDead; }
     // 시신 발견시 불러올 함수
     public void fDetected()
     {
         // 시신 위에 경광등 띄우기
-        gameObject.layer = uninteractableLayer;
+        gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         isCarriable = false;
         gameObject.GetComponent<PoliceController>().isDetected = true;
     }

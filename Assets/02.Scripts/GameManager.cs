@@ -33,18 +33,26 @@ public class GameManager : MonoBehaviour
 
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect)
     {
-        GameObject police = GameObject.FindGameObjectWithTag("Police");
-        if (police != null)
+        GameObject[] polices = GameObject.FindGameObjectsWithTag("Police");
+        bool PoliceExist = false;
+        if (polices != null)
         {
             // °æÂû Ãâµ¿ ¾øÀÌ ÂÑ´ø °Å³ª °è¼Ó ÂÑÀ½
             //police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
-            police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
+            foreach (GameObject police in polices)
+            {
+                if (!police.GetComponent<PoliceController>().getDead())
+                {
+                    police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
+                    PoliceExist = true;
+                }
+            }
         }
-        else
+        if (!PoliceExist)
         {
             // °æÂû Ãâµ¿
             GameObject policeCar = Instantiate(policeCarPrefab);
-            police = Instantiate(policePrefab, policeCar.transform.position, Quaternion.identity);
+            GameObject police = Instantiate(policePrefab, policeCar.transform.position, Quaternion.identity);
             police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
         }
     }

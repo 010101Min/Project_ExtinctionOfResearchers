@@ -1,11 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Experimental.GlobalIllumination;
-using UnityEngine.UIElements;
-using static UnityEditor.Experimental.GraphView.GraphView;
+using UnityEngine.UI;
 
 public class NPCController : MonoBehaviour
 {
@@ -24,6 +20,14 @@ public class NPCController : MonoBehaviour
     private State oldState = State.IDLE;
     private GameObject Suspect = null;
     public GameObject Corpse = null;
+
+    //public ScrollRect aliveState;
+    //public Image Poisoned;
+    //public Image Blinded;
+    //public Image Sleeping;
+    //public ScrollRect deadState;
+    //public Image Dead;
+    //public Image Detected;
 
     private bool isPoisoned = false;
     private bool isCarriable = false;
@@ -66,6 +70,14 @@ public class NPCController : MonoBehaviour
         npcLayer = 1 << LayerMask.NameToLayer("NPC");
         corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
+
+        //aliveState.gameObject.SetActive(false);
+        //Poisoned.gameObject.SetActive(false);
+        //Blinded.gameObject.SetActive(false);
+        //Sleeping.gameObject.SetActive(false);
+        //deadState.gameObject.SetActive(false);
+        //Dead.gameObject.SetActive(false);
+        //Detected.gameObject.SetActive(false);
     }
 
     void Update()
@@ -93,6 +105,8 @@ public class NPCController : MonoBehaviour
                 break;
             default: break;
         }
+
+        //deadState.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
     }
 
     // 연구원 여부 배정
@@ -164,6 +178,20 @@ public class NPCController : MonoBehaviour
         gameObject.layer = LayerMask.NameToLayer("CORPSE");
         // 게임매니저에서 킬 수 올리기 필요
         state = State.DIE;
+        //deadState.gameObject.SetActive(true);
+        //Dead.gameObject.SetActive(true);
+    }
+
+    // 시야 잃을 시 불러올 함수
+    public void fGetBlinded()
+    {
+        witnessable = false;
+        gameObject.layer = LayerMask.NameToLayer("INVISIBLENPC");
+    }
+    public void fOutBlinded()
+    {
+        witnessable = true;
+        gameObject.layer = LayerMask.NameToLayer("NPC");
     }
 
     // 시신 발견시 불러올 함수
@@ -285,25 +313,25 @@ public class NPCController : MonoBehaviour
     {
         float minDistance = float.MaxValue;
         GameObject dest = this.gameObject;
-        GameObject Police = GameObject.FindGameObjectWithTag("Police");
+        GameObject[] Police = GameObject.FindGameObjectsWithTag("Police");
+        GameObject[] phones = GameObject.FindGameObjectsWithTag("Phone");
+        minDistance = float.MaxValue;
+        for (int i = 0; i < phones.Length; i++)
+        {
+            float distance = Vector3.Distance(transform.position, phones[i].transform.position);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                dest = phones[i];
+            }
+        }
         if (Police == null)
         {
             if (isPoliceExist) { fGiveUp(tempProvokable); }
-            GameObject[] phones = GameObject.FindGameObjectsWithTag("Phone");
-            minDistance = float.MaxValue;
-            for (int i = 0; i < phones.Length; i++)
-            {
-                float distance = Vector3.Distance(transform.position, phones[i].transform.position);
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    dest = phones[i];
-                }
-            }
         }
         else
         {
-            dest = Police;
+            foreach (GameObject police in Police) { if (!police.GetComponent<PoliceController>().getDead()) dest = police; }
             isPoliceExist = true;
         }
         return dest;

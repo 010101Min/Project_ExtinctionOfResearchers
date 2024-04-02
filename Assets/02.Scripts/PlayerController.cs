@@ -16,10 +16,14 @@ public class PlayerController : MonoBehaviour
     GameObject nearestShortcut = null;
     Transform tr;
 
+    int visiblenpcLayer;
+    int invisiblenpcLayer;
     int npcLayer;
     int bombLayer;
     int windowLayer;
     int shortcutLayer;
+    int visiblecorpseLayer;
+    int invisiblecorpseLayer;
     int corpseLayer;
     int uninteractableLayer;
 
@@ -27,11 +31,18 @@ public class PlayerController : MonoBehaviour
     {
         tr = GetComponent<Transform>();
 
-        npcLayer = 1 << LayerMask.NameToLayer("NPC");
+        visiblenpcLayer = 1 << LayerMask.NameToLayer("NPC");
+        invisiblenpcLayer = 1 << LayerMask.NameToLayer("INVISIBLENPC");
+        npcLayer = (visiblenpcLayer | invisiblenpcLayer);
+
+        visiblecorpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
+        invisiblecorpseLayer = 1 << LayerMask.NameToLayer("INVISIBLECORPSE");
+        corpseLayer = (visiblecorpseLayer | invisiblecorpseLayer);
+
         bombLayer = 1 << LayerMask.NameToLayer("BOMB");
         windowLayer = 1 << LayerMask.NameToLayer("WINDOW");
         shortcutLayer = 1 << LayerMask.NameToLayer("SHORTCUT");
-        corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
+        
         uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
     }
 
