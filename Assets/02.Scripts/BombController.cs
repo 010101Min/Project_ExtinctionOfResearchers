@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,7 +14,7 @@ public class BombController : MonoBehaviour
     private bool isUsable = true;
     float explosionTimer = 10f;
     float blindTimer = 20f;
-    float poisonTimer = 30f;
+    float poisonTimer = 20f;
     float poisonedTimer = 15f;
     public State state;
 
@@ -48,6 +49,7 @@ public class BombController : MonoBehaviour
             {
                 AfterUse();
                 Debug.Log("독 작동");
+                StartCoroutine(cPoisonUse());
             }
         }
     }
@@ -167,6 +169,8 @@ public class BombController : MonoBehaviour
     // 독 함수
     IEnumerator cPoisonUse()
     {
+        Dictionary<GameObject, bool> poisonDictionary = new Dictionary<GameObject, bool>();
+        
         float timer = 0f;
         int npcLayer = 1 << LayerMask.NameToLayer("NPC");
         int invisiblenpcLayer = 1 << LayerMask.NameToLayer("INVISIBLENPC");
@@ -181,8 +185,24 @@ public class BombController : MonoBehaviour
                 GameObject target = targets1[i].gameObject;
                 Vector3 dirToTarget = (target.transform.position - transform.position).normalized;
                 float distToTarget = Vector3.Distance(transform.position, target.transform.position);
-                if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, wallLayer) && (distToTarget <= 10f)) { StartCoroutine(cPoison(target.gameObject)); }    // NPC 중독
-                else { StopCoroutine(cPoison(target.gameObject)); }    // NPC 중독 회복
+                if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, wallLayer) && (distToTarget <= 10f))    // NPC 중독
+                {
+                    if (!poisonDictionary.ContainsKey(target)) { poisonDictionary.Add(target, false); }
+                    if (!poisonDictionary[target])
+                    {
+                        poisonDictionary[target] = true;
+                        target.GetComponent<NPCController>().fIfInPoisoned();
+                        StartCoroutine(cPoison(target.gameObject));
+                    }
+                }
+                else    // NPC 중독 회복
+                {
+                    if (poisonDictionary.ContainsKey(target))
+                    {
+                        target.GetComponent<NPCController>().fIfOutPoisoned();
+                        poisonDictionary.Remove(target);
+                    }
+                }
             }
             CountBar.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
             timer += Time.deltaTime;
@@ -198,17 +218,16 @@ public class BombController : MonoBehaviour
     {
         float timer = npc.GetComponent<NPCController>().fGetPoisoned() * poisonedTimer; // 이전 중독 상태에 따라 타이머 시작값 설정
         float poisonedPercent = npc.GetComponent<NPCController>().fGetPoisoned();
-        float percent = 0;
         while (poisonedPercent <= 1)
         {
+            if (!npc.GetComponent<NPCController>().fIfPoisoned()) yield break;
             timer += Time.deltaTime;
             float normalizedTimer = Mathf.Clamp(timer / poisonedTimer, 0f, 1f); // 타이머 값을 0과 1 사이로 정규화
-            percent = Mathf.Lerp(1f, 0f, normalizedTimer);
-            npc.GetComponent<NPCController>().Poisoned.fillAmount = percent;    // 정규화된 타이머 값을 사용하여 fillAmount 설정
+            float percent = Mathf.Lerp(0f, 1f, normalizedTimer);
+            //npc.GetComponent<NPCController>().Poisoned.fillAmount = percent;    // 정규화된 타이머 값을 사용하여 fillAmount 설정
             npc.GetComponent<NPCController>().fSetPoisoned(percent);
             yield return null;
         }
-        // 중독 완료
     }
 
 

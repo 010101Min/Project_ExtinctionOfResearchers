@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
             {
                 if (!police.GetComponent<PoliceController>().getDead())
                 {
-                    police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
+                    police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 15 + (policeCount * 5));
                     PoliceExist = true;
                 }
             }
@@ -53,7 +53,8 @@ public class GameManager : MonoBehaviour
             // °æÂû Ãâµ¿
             GameObject policeCar = Instantiate(policeCarPrefab);
             GameObject police = Instantiate(policePrefab, policeCar.transform.position, Quaternion.identity);
-            police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
+            police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 15 + (policeCount * 5));
+            policeCount++;
         }
     }
 

@@ -21,8 +21,8 @@ public class NPCController : MonoBehaviour
     private GameObject Suspect = null;
     public GameObject Corpse = null;
 
-    public ScrollRect aliveState;
-    public Image Poisoned;
+    //public ScrollRect aliveState;
+    //public Image Poisoned;
     //public Image Blinded;
     //public Image Sleeping;
     //public ScrollRect deadState;
@@ -32,15 +32,15 @@ public class NPCController : MonoBehaviour
     private bool isPoisoned = false;
     private bool isCarriable = false;
     public bool isDetected = false;
-    private bool isRecognized = false;
     public bool isDead = false;
     private bool isArrested = false;
     private bool provokable = true;
     private bool witnessable = true;
 
     private float fStateTime = 0f;
-    public float fPoisoned = 0f;
+    private float fPoisoned = 0f;
     private int fProvoke = 0;
+    private float DeathTimer = 0f;
 
     int npcLayer;
     int corpseLayer;
@@ -71,8 +71,8 @@ public class NPCController : MonoBehaviour
         corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
 
-        aliveState.gameObject.SetActive(true);
-        Poisoned.gameObject.SetActive(true);
+        //aliveState.gameObject.SetActive(true);
+        //Poisoned.gameObject.SetActive(true);
         //Blinded.gameObject.SetActive(false);
         //Sleeping.gameObject.SetActive(false);
         //deadState.gameObject.SetActive(false);
@@ -85,6 +85,16 @@ public class NPCController : MonoBehaviour
         // 시야 확인
         if (witnessable) CheckVision();
         // 중독 상태 확인
+        if ((fPoisoned >= 1) && !isDead)
+        {
+            Debug.Log("중독 타이머: " + DeathTimer.ToString());
+            DeathTimer += Time.deltaTime;
+            if (DeathTimer >= 30.0f)
+            {
+                Debug.Log("30초가 지나서 중독사");
+                fDead();
+            }
+        }
 
         switch (state)
         {
@@ -197,6 +207,9 @@ public class NPCController : MonoBehaviour
     // 독 사용시 불러올 함수
     public float fGetPoisoned() { return fPoisoned; }
     public void fSetPoisoned(float percent) { fPoisoned =  percent; }
+    public void fIfInPoisoned() { isPoisoned = true; }
+    public void fIfOutPoisoned() { isPoisoned = false; }
+    public bool fIfPoisoned() { return isPoisoned; }
 
     // 시신 발견시 불러올 함수
     public void fDetected()
@@ -329,15 +342,18 @@ public class NPCController : MonoBehaviour
                 dest = phones[i];
             }
         }
-        if (Police == null)
+        if (Police != null)
         {
-            if (isPoliceExist) { fGiveUp(tempProvokable); }
+            foreach (GameObject police in Police)
+            {
+                if (!police.GetComponent<PoliceController>().getDead())
+                {
+                    dest = police;
+                    isPoliceExist = true;
+                }
+            }
         }
-        else
-        {
-            foreach (GameObject police in Police) { if (!police.GetComponent<PoliceController>().getDead()) dest = police; }
-            isPoliceExist = true;
-        }
+        if (isPoliceExist && dest.gameObject.CompareTag("Phone")) { fGiveUp(tempProvokable); }
         return dest;
     }
     private void fCheckDetected(GameObject corpse, GameObject suspect, bool tempProvokable)
@@ -430,7 +446,6 @@ public class NPCController : MonoBehaviour
         GameManager.Instance.Report(this.gameObject, corpse, Suspect);
         if (corpse.CompareTag("NPC")) corpse.GetComponent<NPCController>().fDetected();
         if (corpse.CompareTag("Police")) corpse.GetComponent<PoliceController>().fDetected();
-        //Debug.Log("Suspect : " + Suspect.gameObject.name + ", Corpse : " + corpse.gameObject.name);
 
         // 원래대로 속성 돌리기
         fGiveUp(tempProvokable);

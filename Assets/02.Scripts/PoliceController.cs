@@ -75,7 +75,6 @@ public class PoliceController : MonoBehaviour
     // 상태 바꾸는 함수
     void ChangeState(State newState)
     {
-        //Debug.Log($"상태 변경... {state} -> {newState}");
         initCoroutine();
         state = newState;
 

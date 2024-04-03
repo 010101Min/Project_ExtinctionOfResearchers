@@ -186,7 +186,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &210765668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,11 +201,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 5
   Corpse: {fileID: 0}
-  aliveState: {fileID: 0}
-  Poisoned: {fileID: 0}
   isDetected: 0
   isDead: 0
-  fPoisoned: 0
   player: {fileID: 0}
   pos: []
 --- !u!65 &210765669
@@ -700,7 +697,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &740809965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -715,11 +712,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   Corpse: {fileID: 0}
-  aliveState: {fileID: 0}
-  Poisoned: {fileID: 0}
   isDetected: 0
   isDead: 0
-  fPoisoned: 0
   player: {fileID: 0}
   pos:
   - {fileID: 1728263942}
@@ -852,7 +846,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &779088947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -867,11 +861,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 4
   Corpse: {fileID: 0}
-  aliveState: {fileID: 0}
-  Poisoned: {fileID: 0}
   isDetected: 0
   isDead: 0
-  fPoisoned: 0
   player: {fileID: 0}
   pos:
   - {fileID: 1728263942}
@@ -1199,7 +1190,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &855534969
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1214,11 +1205,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 4
   Corpse: {fileID: 0}
-  aliveState: {fileID: 0}
-  Poisoned: {fileID: 0}
   isDetected: 0
   isDead: 0
-  fPoisoned: 0
   player: {fileID: 0}
   pos:
   - {fileID: 1728263942}
@@ -1325,7 +1313,7 @@ Transform:
   m_GameObject: {fileID: 855534968}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: 30.73, y: 0, z: 1.49}
+  m_LocalPosition: {x: 37, y: 0, z: 1.49}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1445,7 +1433,7 @@ Transform:
   m_GameObject: {fileID: 881038779}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 35, y: 2, z: 0}
+  m_LocalPosition: {x: 30, y: 2, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -2396,7 +2384,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1728263938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2411,11 +2399,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 5
   Corpse: {fileID: 0}
-  aliveState: {fileID: 0}
-  Poisoned: {fileID: 0}
   isDetected: 0
   isDead: 0
-  fPoisoned: 0
   player: {fileID: 0}
   pos: []
 --- !u!65 &1728263939
@@ -2769,7 +2754,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2128823334
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2784,11 +2769,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   Corpse: {fileID: 0}
-  aliveState: {fileID: 0}
-  Poisoned: {fileID: 0}
   isDetected: 0
   isDead: 0
-  fPoisoned: 0
   player: {fileID: 0}
   pos:
   - {fileID: 1728263942}
@@ -3328,11 +3310,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   Corpse: {fileID: 0}
-  aliveState: {fileID: 4988858932936861098}
-  Poisoned: {fileID: 3329865148025878884}
   isDetected: 0
   isDead: 0
-  fPoisoned: 0
   player: {fileID: 0}
   pos:
   - {fileID: 1728263942}
