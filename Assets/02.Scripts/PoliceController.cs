@@ -19,6 +19,7 @@ public class PoliceController : MonoBehaviour
         HIDE
     }
 
+    private State oldState;
     public State state;
     NavMeshAgent agent;
     private GameObject Suspect;
@@ -76,6 +77,7 @@ public class PoliceController : MonoBehaviour
     void ChangeState(State newState)
     {
         initCoroutine();
+        oldState = state;
         state = newState;
 
         switch (state)
@@ -138,8 +140,22 @@ public class PoliceController : MonoBehaviour
         // 시신 위에 경광등 띄우기
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         isCarriable = false;
-        gameObject.GetComponent<PoliceController>().isDetected = true;
+        //gameObject.GetComponent<PoliceController>().isDetected = true;
+        isDetected = true;
     }
+    public bool fGetDetected() { return isDetected; }
+    // 시신 은닉시 불러올 함수
+    public void fHide()
+    {
+        agent.enabled = false;
+        initCoroutine();
+        if (!isDead)
+        {
+            // 게임매니저에서 킬 수 올리기 필요
+        }
+        Destroy(gameObject);
+    }
+    public bool fGetCarriable() { return isCarriable; }
     // 시신 수습시 불러올 함수
     public void fResolved()
     {
@@ -151,17 +167,19 @@ public class PoliceController : MonoBehaviour
     // 신고 함수
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect, int time)
     {
+        if (corpse.CompareTag("NPC")) corpse.GetComponent<NPCController>().fDetected();
+        if (corpse.CompareTag("Police")) corpse.GetComponent<PoliceController>().fDetected();
         chaseTime = time;
-        if (suspect != null) { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : " + corpse); }
-        else { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse); }
-
         Corpse.Add(corpse);
-        if (suspect == null)
+        if (suspect == reporter)
         {
-            if ((state == State.WAIT) || (state == State.RETURN)) ChangeState(State.RESOLVE);
+            Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse);
+            //if ((state == State.WAIT) || (state == State.RETURN)) ChangeState(State.RESOLVE);
+            if (!((state == State.RETURN) && (oldState == State.CHASE))) ChangeState(State.RESOLVE);
         }
         else
         {
+            Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : " + corpse);
             StopCoroutine(cChase());
             Suspect = suspect;
             ChangeState(State.CHASE);
@@ -185,7 +203,6 @@ public class PoliceController : MonoBehaviour
                 {
                     Debug.Log("시신 목격 " + tempCorpse.name);
                     Corpse.Add(tempCorpse);
-                    // 발견되지 않은 시신 위에 경광등 띄우기
                     // Chase 중이었다면 타겟 바꾸지 않고 계속 추격, Chase 중이 아니었다면 용의자 추적
                     if (tempCorpse.CompareTag("NPC")) tempCorpse.GetComponent<NPCController>().fDetected();
                     if (tempCorpse.CompareTag("Police")) tempCorpse.GetComponent<PoliceController>().fDetected();
@@ -198,7 +215,7 @@ public class PoliceController : MonoBehaviour
     IEnumerator FindSuspect(GameObject corpse)
     {
         Debug.Log("용의자 찾기 시작");
-        GameObject tempSuspect = null;
+        GameObject tempSuspect = this.gameObject;
         Collider[] suspects = Physics.OverlapSphere(corpse.transform.position, 8f, npcLayer);
 
         float distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
@@ -224,7 +241,7 @@ public class PoliceController : MonoBehaviour
         }
 
         LineController.Instance.DrawLine(this.gameObject, this.transform, corpse.transform);
-        if (tempSuspect != null)
+        if (tempSuspect != this.gameObject)
         {
             LineController.Instance.DrawLine(this.gameObject, corpse.transform, tempSuspect.transform);
             Report(this.gameObject, corpse, tempSuspect, chaseTime);
@@ -296,7 +313,7 @@ public class PoliceController : MonoBehaviour
                     agent.SetDestination(this.transform.position);
                     break;
                 }
-                if ((state == State.CHASE) || (state == State.WAIT)) { yield break; }
+                if ((state == State.CHASE) || (state == State.WAIT) || (state == State.RETURN)) { yield break; }
                 yield return null;
             }
         }
@@ -314,7 +331,8 @@ public class PoliceController : MonoBehaviour
         while ((transform.position - policeCar.transform.position).magnitude >= 1f)
         {
             agent.SetDestination(policeCar.transform.position);
-            if ((state == State.CHASE) || (state == State.WAIT) || (state == State.RESOLVE)) { yield break; }
+            if (((state == State.WAIT) || (state == State.RESOLVE)) && (oldState != State.CHASE)) { yield break; }
+            if (state == State.CHASE) { yield break; }
             yield return null;
         }
         transform.position = policeCar.transform.position;

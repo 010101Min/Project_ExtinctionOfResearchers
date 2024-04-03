@@ -21,7 +21,6 @@ public class LineController : MonoBehaviour
 
     IEnumerator npcDrawLine(GameObject witness, Transform startPoint, Transform endPoint)
     {
-        Debug.Log($"시작점 {startPoint.name}, 끝점 {endPoint.name}");
         GameObject lineObject = new GameObject("LineObject");
         LineRenderer lineRenderer = lineObject.AddComponent<LineRenderer>();
 

@@ -8,12 +8,16 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 10f;
     public float turnSpeed = 120f;
+    public Transform carryPos;
     private bool isChased = false;
+    public bool isCarrying;
+    private GameObject carryingBody = null;
 
     GameObject nearestNPC = null;
     GameObject nearestBomb = null;
     GameObject nearestWindow = null;
     GameObject nearestShortcut = null;
+    GameObject nearestCarriable = null;
     Transform tr;
 
     int visiblenpcLayer;
@@ -44,6 +48,8 @@ public class PlayerController : MonoBehaviour
         shortcutLayer = 1 << LayerMask.NameToLayer("SHORTCUT");
         
         uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
+
+        isCarrying = false;
     }
 
     void Update()
@@ -56,7 +62,7 @@ public class PlayerController : MonoBehaviour
         tr.Translate(moveDirection * moveSpeed * Time.deltaTime);
         tr.Rotate(Vector3.up * turnSpeed * Time.deltaTime * r);
 
-        findObject(out nearestNPC, out nearestBomb, out nearestWindow, out nearestShortcut);
+        findObject(out nearestNPC, out nearestBomb, out nearestWindow, out nearestShortcut, out nearestCarriable);
 
         if (nearestNPC != null)
         {
@@ -72,11 +78,6 @@ public class PlayerController : MonoBehaviour
             }
             
         }
-        if (nearestWindow != null)
-        {
-            // 은닉처 작동 가능하다고 UI에 띄우기
-
-        }
         if (nearestShortcut != null)
         {
             // 지름길 작동 가능하다고 UI에 띄우기
@@ -90,24 +91,38 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+        if (isCarrying)
+        {
+            if (Input.GetKeyUp(KeyCode.R)) { dropBody(carryingBody); }
+        }
+        if ((nearestCarriable != null) && !isCarrying)  // 들 수 있는 게 근처에 있고 지금 들고 있는 게 없으면
+        {
+            // 캐릭터 운반 가능하다고 UI에 띄우기
+            if (Input.GetKeyUp(KeyCode.R)) { isCarrying = true; carryingBody = nearestCarriable; StartCoroutine(cCarryBody(carryingBody)); }
+        }
+        if (nearestWindow != null)
+        {
+            // 은닉처 작동 가능하다고 UI에 띄우기
+            if (isCarrying)
+            {
+                hideBody(carryingBody);
+            }
+        }
 
         if (Input.GetKeyDown(KeyCode.E)) { killNpc(nearestNPC); }
         if (Input.GetKeyDown(KeyCode.Q)) { provokeNpc(nearestNPC); }
     }
 
-    void findObject(out GameObject nearestNPC, out GameObject nearestBomb, out GameObject nearestWindow, out GameObject nearestShortcut)
+    void findObject(out GameObject nearestNPC, out GameObject nearestBomb, out GameObject nearestWindow, out GameObject nearestShortcut, out GameObject nearestCarriable)
     {
-        
-        Collider[] colls = new Collider[10];
+        Collider[] colls = Physics.OverlapSphere(this.transform.position, 3f, (bombLayer | windowLayer | shortcutLayer));   // 탐지해야 할 것 : 함정, 은닉처, 지름길
         List<GameObject> bombs = new List<GameObject>();
         List<GameObject> windows = new List<GameObject>();
         List<GameObject> shortcuts = new List<GameObject>();
 
-        int count = Physics.OverlapSphereNonAlloc(this.transform.position, 3f, colls, (bombLayer | windowLayer | shortcutLayer));   // 탐지해야 할 것 : 함정, 은닉처, 지름길
-
-        if (count > 0)
+        if (colls.Length > 0)
         {
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < colls.Length; i++)
             {
                 Vector3 dir = (colls[i].transform.position - transform.position).normalized;
 
@@ -125,49 +140,58 @@ public class PlayerController : MonoBehaviour
         nearestWindow = findNearest(windows);
         nearestShortcut = findNearest(shortcuts);
         nearestNPC = findNpc();
+        nearestCarriable = findCarriable();
     }
 
     GameObject findNpc()
     {
-
-        Collider[] colls = new Collider[20];
+        Collider[] colls = Physics.OverlapSphere(this.transform.position, 3f, npcLayer);   // 탐지해야 할 것 : NPC
         List<GameObject> npcs = new List<GameObject>();
 
-        // npc가 있는지 확인
-        int count = Physics.OverlapSphereNonAlloc(this.transform.position, 2f, colls, npcLayer);   // 탐지해야 할 것 : NPC
-
-        if (count > 0)
+        if (colls.Length > 0)
         {
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < colls.Length; i++)
             {
                 Vector3 dir = (colls[i].transform.position - transform.position).normalized;
 
-                if (Vector3.Angle(transform.forward, dir) < 60f)    // 전방 좌우 60도가 공격 가능 범위
+                if (Vector3.Angle(transform.forward, dir) < 75f)    // 전방 좌우 75도가 공격 가능 범위
                 {
                     float distToTarget = Vector3.Distance(transform.position, colls[i].transform.position);
                     if (!Physics.Raycast(transform.position, dir, distToTarget, ~(npcLayer | corpseLayer | uninteractableLayer)))   // 공격 대상과 플레이어 사이에 있어도 되는 것: 다른 npc, 시신(corpse, uninteractable)
                     {
-                        if (colls[i].CompareTag("NPC")) { if (!colls[i].gameObject.GetComponent<NPCController>().isDead) npcs.Add(colls[i].gameObject); }
+                        if (colls[i].CompareTag("NPC")) { if (!colls[i].gameObject.GetComponent<NPCController>().fGetDead()) npcs.Add(colls[i].gameObject); }
                     }
                 }
             }
         }
         return(findNearest(npcs));
     }
-
-    void killNpc(GameObject target)
+    GameObject findCarriable()
     {
-        if (target != null) { target.GetComponent<NPCController>().fDead(); }
-        else { Debug.Log("타겟 없음"); }
-    }
+        Collider[] colls = Physics.OverlapSphere(this.transform.position, 3f, (npcLayer | corpseLayer));   // 탐지해야 할 것 : NPC, 시신(미신고)
+        List<GameObject> bodies = new List<GameObject>();
 
-    void provokeNpc(GameObject target)
-    {
-        int rand = Random.Range(1, 101);
-        if (target != null) { target.GetComponent<NPCController>().CheckProvoked(rand); }
-        else { Debug.Log("타겟 없음"); }
-    }
+        if (colls.Length > 0)
+        {
+            for (int i = 0; i < colls.Length; i++)
+            {
+                Vector3 dir = (colls[i].transform.position - transform.position).normalized;
 
+                if (Vector3.Angle(transform.forward, dir) < 75f)
+                {
+                    float distToTarget = Vector3.Distance(transform.position, colls[i].transform.position);
+                    if (!Physics.Raycast(transform.position, dir, distToTarget, ~(npcLayer | corpseLayer | uninteractableLayer)))   // 공격 대상과 플레이어 사이에 있어도 되는 것: 다른 npc, 시신(corpse, uninteractable)
+                    {
+                        if ((colls[i].CompareTag("NPC") && colls[i].gameObject.GetComponent<NPCController>().fGetCarriable()) || (colls[i].CompareTag("Police") && colls[i].gameObject.GetComponent<PoliceController>().fGetCarriable()))
+                        {
+                            bodies.Add(colls[i].gameObject);
+                        }
+                    }
+                }
+            }
+        }
+        return (findNearest(bodies));
+    }
     GameObject findNearest(List<GameObject> lists)
     {
         float minDistance = float.MaxValue;
@@ -188,6 +212,56 @@ public class PlayerController : MonoBehaviour
         }
         return nearestItem;
     }
+
+    void killNpc(GameObject target)
+    {
+        if (target != null) { target.GetComponent<NPCController>().fDead(); }
+        else { Debug.Log("타겟 없음"); }
+    }
+    void provokeNpc(GameObject target)
+    {
+        int rand = Random.Range(1, 101);
+        if (target != null) { target.GetComponent<NPCController>().CheckProvoked(rand); }
+        else { Debug.Log("타겟 없음"); }
+    }
+    IEnumerator cCarryBody(GameObject body)
+    {
+        while (true)
+        {
+            if (!isCarrying) { yield break; }
+            if (body.CompareTag("NPC"))
+            {
+                if (body.GetComponent<NPCController>().fGetCarriable()) { body.transform.position = carryPos.position; }
+                else { dropBody(body); yield break; }
+            }
+            else if (body.CompareTag("Police"))
+            {
+                if (body.GetComponent<PoliceController>().fGetCarriable()) { body.transform.position = carryPos.position; }
+                else { dropBody(body); yield break; }
+            }
+            yield return null;
+        }
+    }
+    void dropBody(GameObject body)
+    {
+        body.transform.position = new Vector3(body.transform.position.x, 0f, body.transform.position.z);
+        isCarrying = false;
+        carryingBody = null;
+    }
+    void hideBody(GameObject body)
+    {
+        isCarrying = false;
+        carryingBody = null;
+        if (body.CompareTag("NPC"))
+        {
+            body.GetComponent<NPCController>().fHide();
+        }
+        else if (body.CompareTag("Police"))
+        {
+            body.GetComponent<PoliceController>().fHide();
+        }
+    }
+
     public void inChased()
     {
         isChased = true;

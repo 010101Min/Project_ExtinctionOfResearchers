@@ -74,8 +74,8 @@ public class EngineerController : MonoBehaviour
         }
         shortcut.GetComponent<ShortCutController>().fDestroy();
         removeItems(shortcut);
-        //if (ShortCuts.Count > 0) { StartCoroutine(cCome()); Debug.Log("남은 지름길 더 있음"); }
-        //else { StartCoroutine(cReturn()); Debug.Log("남은 지름길 없음"); }
+        if (ShortCuts.Count > 0) { StartCoroutine(cCome()); Debug.Log("남은 지름길 더 있음"); }
+        else { StartCoroutine(cReturn()); Debug.Log("남은 지름길 없음"); }
     }
     
     // Return 상태 구현

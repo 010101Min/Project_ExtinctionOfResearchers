@@ -31,8 +31,9 @@ public class NPCController : MonoBehaviour
 
     private bool isPoisoned = false;
     private bool isCarriable = false;
-    public bool isDetected = false;
-    public bool isDead = false;
+    private bool isDetected = false;
+    private bool isDead = false;
+    private bool isResolved = false;
     private bool isArrested = false;
     private bool provokable = true;
     private bool witnessable = true;
@@ -191,6 +192,7 @@ public class NPCController : MonoBehaviour
         //deadState.gameObject.SetActive(true);
         //Dead.gameObject.SetActive(true);
     }
+    public bool fGetDead() { return isDead; }
 
     // 시야 잃을 시 불러올 함수
     public void fGetBlinded()
@@ -217,8 +219,10 @@ public class NPCController : MonoBehaviour
         // 시신 위에 경광등 띄우기
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         isCarriable = false;
-        gameObject.GetComponent<NPCController>().isDetected = true;
+        //gameObject.GetComponent<NPCController>().isDetected = true;
+        isDetected = true;
     }
+    public bool fGetDetected() { return isDetected; }
 
     // 시신 은닉시 불러올 함수
     public void fHide()
@@ -231,11 +235,15 @@ public class NPCController : MonoBehaviour
         }
         Destroy(gameObject);
     }
+    public bool fGetCarriable() { return isCarriable; }
 
     // 시신 수습시 불러올 함수
     public void fResolved()
     {
         initCoroutine();
+        isResolved = true;
+        this.gameObject.tag = "Uninteractable";
+        this.enabled = false;
         // 아직 이펙트 없어서 임시로 삭제
         //Destroy(gameObject);
     }
@@ -360,16 +368,16 @@ public class NPCController : MonoBehaviour
     {
         if (corpse.CompareTag("NPC"))
         {
-            if (corpse.gameObject.GetComponent<NPCController>().isDetected)
+            if (corpse.gameObject.GetComponent<NPCController>().fGetDetected())
             {
-                if (suspect == null) { fGiveUp(tempProvokable); }
+                if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
             }
         }
         if (corpse.CompareTag("Police"))
         {
-            if(corpse.gameObject.GetComponent<PoliceController>().isDetected)
+            if(corpse.gameObject.GetComponent<PoliceController>().fGetDetected())
             {
-                if (suspect == null) { fGiveUp(tempProvokable); }
+                if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
             }
         }
     }
@@ -402,10 +410,11 @@ public class NPCController : MonoBehaviour
         if (colls.Length <= 0)
         {
             if ((distToPlayer <= 6f) && isPlayerInSight) { Suspect = player; }
-            else { Suspect = null; }
+            else { Suspect = this.gameObject; }
         }
         else
         {
+            Suspect = this.gameObject;
             for (int i = 0; i < colls.Length; i++)
             {
                 Vector3 dirToTarget = (colls[i].gameObject.transform.position - corpse.transform.position).normalized;
@@ -417,7 +426,6 @@ public class NPCController : MonoBehaviour
                 }
             }
             if (distToPlayer - 1 <= distToTarget) { Suspect = player; }
-            if (Suspect.Equals(this.gameObject)) { Suspect = null; }
         }
 
         agent.enabled = false;
@@ -434,7 +442,10 @@ public class NPCController : MonoBehaviour
         {
             // 만약 경찰이 있었는데 신고 하러 가는 도중에 사라지면 신고 안 하고 포기
             dest = findPlace(ref isPoliceExist, tempProvokable);
+            // 만약 신고 하러 가는 도중 그 시신이 신고받으면 신고 포기
             fCheckDetected(corpse, Suspect, tempProvokable);
+            // 만약 신고 하러 가는 도중 그 시신이 사라지면(은닉되면) 신고 포기
+            if (corpse == null) { fGiveUp(tempProvokable); }
             if (state == State.MOVE) yield break;
             if ((transform.position - dest.transform.position).magnitude <= 2.5f) break;
             agent.SetDestination(dest.transform.position);
@@ -444,8 +455,6 @@ public class NPCController : MonoBehaviour
         // 여기에 게임매니저로 신고하는 코드 (신고 직전 isDetected 체크)
         // 신고할 위치에 가장 먼저 도착한 한 명만 신고하도록
         GameManager.Instance.Report(this.gameObject, corpse, Suspect);
-        if (corpse.CompareTag("NPC")) corpse.GetComponent<NPCController>().fDetected();
-        if (corpse.CompareTag("Police")) corpse.GetComponent<PoliceController>().fDetected();
 
         // 원래대로 속성 돌리기
         fGiveUp(tempProvokable);
