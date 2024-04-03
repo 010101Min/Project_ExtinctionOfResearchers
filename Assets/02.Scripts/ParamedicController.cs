@@ -14,90 +14,92 @@ public class ParamedicController : MonoBehaviour
     }
 
     public State state = State.WAIT;
-    private GameObject ambulance;
+    public GameObject ambulance;
 
     private NavMeshAgent agent;
     private Animator anim;
 
     public List<GameObject> Corpses = new List<GameObject>();
 
-    //void Start()
-    //{
-    //    agent = GetComponent<NavMeshAgent>();
-    //    agent.speed = 7f;
-    //}
+    void Start()
+    {
+        this.gameObject.transform.position = ambulance.transform.position;
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = 7f;
+    }
 
-    //public void Report(GameObject shortcut)
-    //{
-    //    ShortCuts.Add(shortcut);
-    //    StopCoroutine(cCome());
-    //    StopCoroutine(cReturn());
-    //    StartCoroutine(cCome());
-    //}
+    public void Report(List<GameObject> Corps)
+    {
+        foreach (GameObject corp in Corps) { Corpses.Add(corp); }
+        StopCoroutine(cCome());
+        StopCoroutine(cReturn());
+        StartCoroutine(cCome());
+    }
 
-    //// Come 상태 구현
-    //GameObject findNearestShortcut(List<GameObject> shortcuts)
-    //{
-    //    GameObject minShortcut = ShortCuts[0];
-    //    float minDist = float.MaxValue;
-    //    foreach (GameObject shortcut in shortcuts)
-    //    {
-    //        float distance = Vector3.Distance(this.transform.position, shortcut.GetComponent<ShortCutController>().FindShortest(this.gameObject).transform.position);
-    //        if (distance <= minDist) { minShortcut = shortcut; }
-    //    }
-    //    return minShortcut;
-    //}
-    //IEnumerator cCome()
-    //{
-    //    GameObject destShortcut = findNearestShortcut(ShortCuts);
-    //    while (true)
-    //    {
-    //        agent.SetDestination(destShortcut.GetComponent<ShortCutController>().FindShortest(this.gameObject).transform.position);
-    //        if ((transform.position - destShortcut.GetComponent<ShortCutController>().FindShortest(this.gameObject).transform.position).magnitude <= 1f) { break; }
-    //        yield return null;
-    //    }
-    //    StartCoroutine(cSabotage(destShortcut));
-    //}
+    // Come 상태 구현
+    GameObject findNearestShortcut(List<GameObject> corpses)
+    {
+        GameObject minCorpse = Corpses[0];
+        float minDist = float.MaxValue;
+        foreach (GameObject corpse in corpses)
+        {
+            float distance = Vector3.Distance(this.transform.position, corpse.transform.position);
+            if (distance <= minDist) { minCorpse = corpse; }
+        }
+        return minCorpse;
+    }
+    IEnumerator cCome()
+    {
+        GameObject destCorpse = findNearestShortcut(Corpses);
+        while (true)
+        {
+            agent.SetDestination(destCorpse.transform.position);
+            if ((transform.position - destCorpse.transform.position).magnitude <= 1f) { break; }
+            yield return null;
+        }
+        StartCoroutine(cResolve(destCorpse));
+    }
 
-    //// Sabotage 상태 구현
-    //IEnumerator cSabotage(GameObject shortcut)
-    //{
-    //    float elapsedTime = 0f;
+    // Resolve 상태 구현
+    IEnumerator cResolve(GameObject corpse)
+    {
+        float elapsedTime = 0f;
 
-    //    while (elapsedTime < 5f)
-    //    {
-    //        elapsedTime += Time.deltaTime;
-    //        yield return null;
-    //    }
-    //    shortcut.GetComponent<ShortCutController>().fDestroy();
-    //    removeItems(shortcut);
-    //    //if (ShortCuts.Count > 0) { StartCoroutine(cCome()); Debug.Log("남은 지름길 더 있음"); }
-    //    //else { StartCoroutine(cReturn()); Debug.Log("남은 지름길 없음"); }
-    //}
+        while (elapsedTime < 1f)
+        {
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        if (corpse.CompareTag("NPC")) { corpse.GetComponent<NPCController>().fResolved(); }
+        else if (corpse.CompareTag("Police")) { corpse.GetComponent<PoliceController>().fResolved(); }
+        removeItems(corpse);
+        if (Corpses.Count > 0) { StartCoroutine(cCome()); Debug.Log("남은 시신 더 있음"); }
+        else { StartCoroutine(cReturn()); Debug.Log("남은 시신 없음"); }
+    }
 
-    //// Return 상태 구현
-    //IEnumerator cReturn()
-    //{
-    //    while (true)
-    //    {
-    //        agent.SetDestination(home.transform.position);
-    //        if (Vector3.Distance(this.gameObject.transform.position, home.transform.position) <= 0.5f) { break; }
-    //        yield return null;
-    //    }
-    //    this.gameObject.transform.position = home.transform.position;
-    //}
+    // Return 상태 구현
+    IEnumerator cReturn()
+    {
+        while (true)
+        {
+            agent.SetDestination(ambulance.transform.position);
+            if (Vector3.Distance(this.gameObject.transform.position, ambulance.transform.position) <= 0.5f) { break; }
+            yield return null;
+        }
+        this.gameObject.transform.position = ambulance.transform.position;
+    }
 
-    //// Wait 상태 구현
-    //void fWait()
-    //{
-    //    StopAllCoroutines();
-    //}
+    // Wait 상태 구현
+    void fWait()
+    {
+        StopAllCoroutines();
+    }
 
-    //void removeItems(GameObject item)
-    //{
-    //    for (int i = ShortCuts.Count - 1; i >= 0; i--)
-    //    {
-    //        if (ShortCuts[i] == item) { ShortCuts.RemoveAt(i); }
-    //    }
-    //}
+    void removeItems(GameObject item)
+    {
+        for (int i = Corpses.Count - 1; i >= 0; i--)
+        {
+            if (Corpses[i] == item) { Corpses.RemoveAt(i); }
+        }
+    }
 }

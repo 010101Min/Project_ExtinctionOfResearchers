@@ -336,6 +336,7 @@ public class PoliceController : MonoBehaviour
             yield return null;
         }
         transform.position = policeCar.transform.position;
+        GameManager.Instance.plusCorpse(Corpse);
         cWait();
     }
     // Wait 상태 구현 (임시)

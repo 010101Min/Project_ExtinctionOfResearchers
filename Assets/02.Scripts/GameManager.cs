@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,7 +14,10 @@ public class GameManager : MonoBehaviour
 
     public GameObject policePrefab;
     public GameObject engineer;
+    public GameObject paramedic;
     public GameObject policeCarPrefab;
+
+    public List<GameObject> Corpses = new List<GameObject>();
 
     private void Awake()
     {
@@ -28,7 +32,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-
+        
     }
 
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect)
@@ -57,10 +61,20 @@ public class GameManager : MonoBehaviour
             policeCount++;
         }
     }
+    public void plusCorpse(List<GameObject> corpses)
+    {
+        foreach(GameObject corpse in corpses) { Corpses.Add(corpse); }
+        if (corpses.Count > 3) { ParamedicReport(Corpses); Corpses = null; }
+    }
 
     public void DestroyShortCut(GameObject shortCut)
     {
         // 엔지니어에게 전달
         engineer.GetComponent<EngineerController>().Report(shortCut);
+    }
+
+    public void ParamedicReport(List<GameObject> corpses)
+    {
+        paramedic.GetComponent<ParamedicController>().Report(corpses);
     }
 }
