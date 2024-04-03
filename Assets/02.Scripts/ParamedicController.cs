@@ -73,8 +73,8 @@ public class ParamedicController : MonoBehaviour
         if (corpse.CompareTag("NPC")) { corpse.GetComponent<NPCController>().fResolved(); }
         else if (corpse.CompareTag("Police")) { corpse.GetComponent<PoliceController>().fResolved(); }
         removeItems(corpse);
-        if (Corpses.Count > 0) { StartCoroutine(cCome()); Debug.Log("남은 시신 더 있음"); }
-        else { StartCoroutine(cReturn()); Debug.Log("남은 시신 없음"); }
+        if (Corpses.Count > 0) { StartCoroutine(cCome()); }
+        else { StartCoroutine(cReturn()); }
     }
 
     // Return 상태 구현

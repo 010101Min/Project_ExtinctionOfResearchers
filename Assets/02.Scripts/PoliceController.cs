@@ -31,6 +31,7 @@ public class PoliceController : MonoBehaviour
     private bool isDead = false;
     public bool isDetected = false;
     private bool isCarriable = false;
+    private bool isHidden = false;
 
     int npcLayer;
     int corpseLayer;
@@ -148,14 +149,28 @@ public class PoliceController : MonoBehaviour
     public void fHide()
     {
         agent.enabled = false;
+        isHidden = true;
+        gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         initCoroutine();
         if (!isDead)
         {
             // 게임매니저에서 킬 수 올리기 필요
         }
+        StartCoroutine(cHide());
+        //Destroy(gameObject);
+    }
+    IEnumerator cHide()
+    {
+        float elapsedTime = 0f;
+        while (elapsedTime < 60f)
+        {
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
         Destroy(gameObject);
     }
     public bool fGetCarriable() { return isCarriable; }
+    public bool fGetHidden() { return isHidden; }
     // 시신 수습시 불러올 함수
     public void fResolved()
     {
@@ -167,10 +182,13 @@ public class PoliceController : MonoBehaviour
     // 신고 함수
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect, int time)
     {
-        if (corpse.CompareTag("NPC")) corpse.GetComponent<NPCController>().fDetected();
-        if (corpse.CompareTag("Police")) corpse.GetComponent<PoliceController>().fDetected();
+        if (corpse != null)
+        {
+            if (corpse.CompareTag("NPC")) corpse.GetComponent<NPCController>().fDetected();
+            if (corpse.CompareTag("Police")) corpse.GetComponent<PoliceController>().fDetected();
+        }
         chaseTime = time;
-        Corpse.Add(corpse);
+        if (corpse != null) { Corpse.Add(corpse); }
         if (suspect == reporter)
         {
             Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse);
@@ -179,7 +197,8 @@ public class PoliceController : MonoBehaviour
         }
         else
         {
-            Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : " + corpse);
+            if (corpse != null) { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : " + corpse.name); }
+            else { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : 사라짐"); }
             StopCoroutine(cChase());
             Suspect = suspect;
             ChangeState(State.CHASE);
@@ -201,11 +220,11 @@ public class PoliceController : MonoBehaviour
                 float distToCorpse = Vector3.Distance(transform.position, tempCorpse.transform.position);
                 if (!Physics.Raycast(transform.position, dirToCorpse, distToCorpse, wallLayer))
                 {
+                    if (tempCorpse.CompareTag("NPC")) tempCorpse.GetComponent<NPCController>().fDetected();
+                    if (tempCorpse.CompareTag("Police")) tempCorpse.GetComponent<PoliceController>().fDetected();
                     Debug.Log("시신 목격 " + tempCorpse.name);
                     Corpse.Add(tempCorpse);
                     // Chase 중이었다면 타겟 바꾸지 않고 계속 추격, Chase 중이 아니었다면 용의자 추적
-                    if (tempCorpse.CompareTag("NPC")) tempCorpse.GetComponent<NPCController>().fDetected();
-                    if (tempCorpse.CompareTag("Police")) tempCorpse.GetComponent<PoliceController>().fDetected();
                     if (state != State.CHASE) { StartCoroutine(FindSuspect(tempCorpse)); }
                 }
             }
@@ -262,6 +281,7 @@ public class PoliceController : MonoBehaviour
         yield return null;
         agent.speed = 10f;
         float elapsedTime = 0f;
+
         Debug.Log("추격 시작 / 추격 대상 : " + Suspect.name);
         if (Suspect.Equals(player)) { player.GetComponent<PlayerController>().inChased(); }
 

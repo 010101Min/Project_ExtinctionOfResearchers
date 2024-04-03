@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class NPCController : MonoBehaviour
 {
@@ -35,6 +36,7 @@ public class NPCController : MonoBehaviour
     private bool isDead = false;
     private bool isResolved = false;
     private bool isArrested = false;
+    private bool isHidden = false;
     private bool provokable = true;
     private bool witnessable = true;
 
@@ -228,14 +230,28 @@ public class NPCController : MonoBehaviour
     public void fHide()
     {
         agent.enabled = false;
+        isHidden = true;
+        gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         initCoroutine();
         if (!isDead)
         {
             // 게임매니저에서 킬 수 올리기 필요
         }
+        StartCoroutine(cHide());
+        //Destroy(gameObject);
+    }
+    IEnumerator cHide()
+    {
+        float elapsedTime = 0f;
+        while (elapsedTime < 60f)
+        {
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
         Destroy(gameObject);
     }
     public bool fGetCarriable() { return isCarriable; }
+    public bool fGetHidden() { return isHidden; }
 
     // 시신 수습시 불러올 함수
     public void fResolved()
@@ -366,18 +382,40 @@ public class NPCController : MonoBehaviour
     }
     private void fCheckDetected(GameObject corpse, GameObject suspect, bool tempProvokable)
     {
-        if (corpse.CompareTag("NPC"))
+        if (corpse != null)
         {
-            if (corpse.gameObject.GetComponent<NPCController>().fGetDetected())
+            if (corpse.CompareTag("NPC") && (corpse != null))
             {
-                if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
+                if (corpse.gameObject.GetComponent<NPCController>().fGetDetected())
+                {
+                    if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
+                }
+            }
+            else if (corpse.CompareTag("Police") && (corpse != null))
+            {
+                if (corpse.gameObject.GetComponent<PoliceController>().fGetDetected())
+                {
+                    if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
+                }
             }
         }
-        if (corpse.CompareTag("Police"))
+    }
+    private void fCheckCorpseExist(GameObject corpse, GameObject suspect, bool tempProvokable)
+    {
+        if (corpse.CompareTag("NPC"))
         {
-            if(corpse.gameObject.GetComponent<PoliceController>().fGetDetected())
+            if (corpse.GetComponent<NPCController>().fGetHidden())
             {
                 if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
+                else corpse = null;
+            }
+        }
+        else if (corpse.CompareTag("Police"))
+        {
+            if (corpse.GetComponent<PoliceController>().fGetHidden())
+            {
+                if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
+                else corpse = null;
             }
         }
     }
@@ -433,6 +471,8 @@ public class NPCController : MonoBehaviour
         // NPC - 시신 - 용의자 선 긋기
         LineController.Instance.DrawLine(this.gameObject, this.transform, corpse.transform);
         if (Suspect != null) { LineController.Instance.DrawLine(this.gameObject, corpse.transform, Suspect.transform); }
+        float timer = 0f;
+        //while (timer < 0.5f) { timer += Time.deltaTime; yield return null; }
         yield return new WaitForSeconds(0.5f);
 
         agent.enabled = true;
@@ -440,12 +480,17 @@ public class NPCController : MonoBehaviour
 
         while (true)
         {
+            // 만약 신고 하러 가는 도중 그 시신이 사라지면(은닉되면) 신고 포기
+            //if (corpse.CompareTag("NPC")) { if (corpse.GetComponent<NPCController>().fGetHidden()) fGiveUp(tempProvokable); }
+            //if (corpse.CompareTag("Police")) { if (corpse.GetComponent<PoliceController>().fGetHidden()) fGiveUp(tempProvokable); }
+
+            // 만약 신고 하러 가는 도중 그 시신이 사라지면(은닉되면) 용의자만 신고
+            fCheckCorpseExist(corpse, Suspect, tempProvokable);
+
             // 만약 경찰이 있었는데 신고 하러 가는 도중에 사라지면 신고 안 하고 포기
             dest = findPlace(ref isPoliceExist, tempProvokable);
             // 만약 신고 하러 가는 도중 그 시신이 신고받으면 신고 포기
             fCheckDetected(corpse, Suspect, tempProvokable);
-            // 만약 신고 하러 가는 도중 그 시신이 사라지면(은닉되면) 신고 포기
-            if (corpse == null) { fGiveUp(tempProvokable); }
             if (state == State.MOVE) yield break;
             if ((transform.position - dest.transform.position).magnitude <= 2.5f) break;
             agent.SetDestination(dest.transform.position);

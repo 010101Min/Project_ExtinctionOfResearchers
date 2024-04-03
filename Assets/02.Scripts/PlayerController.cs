@@ -103,7 +103,7 @@ public class PlayerController : MonoBehaviour
         if (nearestWindow != null)
         {
             // 은닉처 작동 가능하다고 UI에 띄우기
-            if (isCarrying)
+            if (isCarrying && (Input.GetKeyUp(KeyCode.Space)))
             {
                 hideBody(carryingBody);
             }
