@@ -229,16 +229,11 @@ public class NPCController : MonoBehaviour
     // 시신 은닉시 불러올 함수
     public void fHide()
     {
-        agent.enabled = false;
+        if (!isDead) { fDead(); }
         isHidden = true;
+        
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
-        initCoroutine();
-        if (!isDead)
-        {
-            // 게임매니저에서 킬 수 올리기 필요
-        }
         StartCoroutine(cHide());
-        //Destroy(gameObject);
     }
     IEnumerator cHide()
     {
@@ -388,14 +383,14 @@ public class NPCController : MonoBehaviour
             {
                 if (corpse.gameObject.GetComponent<NPCController>().fGetDetected())
                 {
-                    if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
+                    if (!fCheckSuspect(suspect)) { fGiveUp(tempProvokable); }
                 }
             }
             else if (corpse.CompareTag("Police") && (corpse != null))
             {
                 if (corpse.gameObject.GetComponent<PoliceController>().fGetDetected())
                 {
-                    if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
+                    if (!fCheckSuspect(suspect)) { fGiveUp(tempProvokable); }
                 }
             }
         }
@@ -406,7 +401,7 @@ public class NPCController : MonoBehaviour
         {
             if (corpse.GetComponent<NPCController>().fGetHidden())
             {
-                if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
+                if (!fCheckSuspect(suspect)) { fGiveUp(tempProvokable); }
                 else corpse = null;
             }
         }
@@ -414,7 +409,7 @@ public class NPCController : MonoBehaviour
         {
             if (corpse.GetComponent<PoliceController>().fGetHidden())
             {
-                if (suspect == this.gameObject) { fGiveUp(tempProvokable); }
+                if (!fCheckSuspect(suspect)) { fGiveUp(tempProvokable); }
                 else corpse = null;
             }
         }
@@ -429,6 +424,16 @@ public class NPCController : MonoBehaviour
         reportCoroutine = null;
         state = State.MOVE;
     }
+    private bool fCheckSuspect(GameObject suspect)
+    {
+        if ((suspect == null) || (suspect.Equals(this.gameObject))) return false;
+        if (suspect.Equals(player)) return true;
+        else
+        {
+            if (suspect.GetComponent<NPCController>().fGetDead()) { return false; }
+            else { return true; }
+        }
+    }
     IEnumerator cReport(GameObject corpse)
     {
         bool tempProvokable = provokable;
@@ -438,7 +443,7 @@ public class NPCController : MonoBehaviour
         bool isPoliceExist = false;
 
         // 의심할 캐릭터 결정
-        // 만약 의심할 캐릭터가 없다면 null을 의심 (경찰 신고 시 신고자와 용의자 모두 받도록...)
+        // 만약 의심할 캐릭터가 없다면 자기 자신을 의심 (경찰 신고 시 신고자와 용의자 모두 받도록...)
         Collider[] colls = Physics.OverlapSphere(corpse.transform.position, 5f, npcLayer);
 
         float distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
@@ -471,20 +476,13 @@ public class NPCController : MonoBehaviour
         // NPC - 시신 - 용의자 선 긋기
         LineController.Instance.DrawLine(this.gameObject, this.transform, corpse.transform);
         if (Suspect != null) { LineController.Instance.DrawLine(this.gameObject, corpse.transform, Suspect.transform); }
-        float timer = 0f;
-        //while (timer < 0.5f) { timer += Time.deltaTime; yield return null; }
         yield return new WaitForSeconds(0.5f);
 
         agent.enabled = true;
         agent.speed = 5.6f;
 
         while (true)
-        {
-            // 만약 신고 하러 가는 도중 그 시신이 사라지면(은닉되면) 신고 포기
-            //if (corpse.CompareTag("NPC")) { if (corpse.GetComponent<NPCController>().fGetHidden()) fGiveUp(tempProvokable); }
-            //if (corpse.CompareTag("Police")) { if (corpse.GetComponent<PoliceController>().fGetHidden()) fGiveUp(tempProvokable); }
-
-            // 만약 신고 하러 가는 도중 그 시신이 사라지면(은닉되면) 용의자만 신고
+        {// 만약 신고 하러 가는 도중 그 시신이 사라지면(은닉되면) 용의자만 신고
             fCheckCorpseExist(corpse, Suspect, tempProvokable);
 
             // 만약 경찰이 있었는데 신고 하러 가는 도중에 사라지면 신고 안 하고 포기
@@ -497,7 +495,6 @@ public class NPCController : MonoBehaviour
             yield return null;
         }
 
-        // 여기에 게임매니저로 신고하는 코드 (신고 직전 isDetected 체크)
         // 신고할 위치에 가장 먼저 도착한 한 명만 신고하도록
         GameManager.Instance.Report(this.gameObject, corpse, Suspect);
 

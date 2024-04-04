@@ -216,16 +216,17 @@ public class BombController : MonoBehaviour
     // 독 함수 (개인)
     IEnumerator cPoison(GameObject npc)
     {
-        float timer = npc.GetComponent<NPCController>().fGetPoisoned() * poisonedTimer; // 이전 중독 상태에 따라 타이머 시작값 설정
+        float timer = 0f;
         float poisonedPercent = npc.GetComponent<NPCController>().fGetPoisoned();
-        while (poisonedPercent <= 1)
+
+        while (true)
         {
             if (!npc.GetComponent<NPCController>().fIfPoisoned()) yield break;
             timer += Time.deltaTime;
-            float normalizedTimer = Mathf.Clamp(timer / poisonedTimer, 0f, 1f); // 타이머 값을 0과 1 사이로 정규화
-            float percent = Mathf.Lerp(0f, 1f, normalizedTimer);
-            //npc.GetComponent<NPCController>().Poisoned.fillAmount = percent;    // 정규화된 타이머 값을 사용하여 fillAmount 설정
+            float normalizedTimer = Mathf.Clamp(timer / ((1 - poisonedPercent) * poisonedTimer), 0f, 1f);
+            float percent = Mathf.Lerp(poisonedPercent, 1f, normalizedTimer);
             npc.GetComponent<NPCController>().fSetPoisoned(percent);
+            if (percent >= 1) yield break;
             yield return null;
         }
     }

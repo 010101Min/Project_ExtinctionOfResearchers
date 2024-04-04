@@ -186,9 +186,9 @@ public class PoliceController : MonoBehaviour
         {
             if (corpse.CompareTag("NPC")) corpse.GetComponent<NPCController>().fDetected();
             if (corpse.CompareTag("Police")) corpse.GetComponent<PoliceController>().fDetected();
+            Corpse.Add(corpse);
         }
         chaseTime = time;
-        if (corpse != null) { Corpse.Add(corpse); }
         if (suspect == reporter)
         {
             Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse);
@@ -284,9 +284,11 @@ public class PoliceController : MonoBehaviour
 
         Debug.Log("추격 시작 / 추격 대상 : " + Suspect.name);
         if (Suspect.Equals(player)) { player.GetComponent<PlayerController>().inChased(); }
+        else { player.GetComponent<PlayerController>().outChased(); }
 
         while ((elapsedTime < chaseTime) && (Suspect != null))
         {
+            if (Suspect.CompareTag("NPC")) { if (Suspect.GetComponent<NPCController>().fGetDead()) break; }
             agent.SetDestination(Suspect.transform.position);
             if ((transform.position - Suspect.transform.position).magnitude <= 2.5f)
             {
@@ -300,6 +302,7 @@ public class PoliceController : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+        player.GetComponent<PlayerController>().outChased();
         Suspect = null;
         Debug.Log("추격 종료");
         agent.speed = 6f;

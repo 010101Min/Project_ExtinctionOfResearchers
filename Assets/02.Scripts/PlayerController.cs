@@ -2,15 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 10f;
     public float turnSpeed = 120f;
     public Transform carryPos;
+    public Image HandCuff;
+    public Image Stamina_Box;
+    public Image Stamina_Bar;
+    private Coroutine refillStaminaCoroutine;
     private bool isChased = false;
-    public bool isCarrying;
+    private bool isCarrying;
+    public bool isRunning;
     private GameObject carryingBody = null;
 
     GameObject nearestNPC = null;
@@ -50,6 +55,11 @@ public class PlayerController : MonoBehaviour
         uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
 
         isCarrying = false;
+
+        HandCuff.enabled = false;
+        Stamina_Bar.fillAmount = 1f;
+        Stamina_Box.enabled = false;
+        Stamina_Bar.enabled = false;
     }
 
     void Update()
@@ -57,6 +67,12 @@ public class PlayerController : MonoBehaviour
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
         float r = Input.GetAxis("Mouse X");
+
+        if (Input.GetKey(KeyCode.LeftShift) && !(x == 0 && z == 0) && !isRunning && (Stamina_Bar.fillAmount >= 0.2f))
+        {
+            startRun();
+        }
+        else if (!Input.GetKey(KeyCode.LeftShift) || (x == 0 && z == 0)) { isRunning = false; }
 
         Vector3 moveDirection = new Vector3(x, 0f, z);
         tr.Translate(moveDirection * moveSpeed * Time.deltaTime);
@@ -91,14 +107,19 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
-        if (isCarrying)
-        {
-            if (Input.GetKeyUp(KeyCode.R)) { dropBody(carryingBody); }
-        }
-        if ((nearestCarriable != null) && !isCarrying)  // 들 수 있는 게 근처에 있고 지금 들고 있는 게 없으면
+        if ((nearestCarriable != null) && (!isCarrying) && (carryingBody == null))  // 들 수 있는 게 근처에 있고 지금 들고 있는 게 없으면
         {
             // 캐릭터 운반 가능하다고 UI에 띄우기
-            if (Input.GetKeyUp(KeyCode.R)) { isCarrying = true; carryingBody = nearestCarriable; StartCoroutine(cCarryBody(carryingBody)); }
+            if (Input.GetKeyUp(KeyCode.R))
+            {
+                isCarrying = true;
+                carryingBody = nearestCarriable;
+                StartCoroutine(cCarryBody(carryingBody));
+            }
+        }
+        else if (isCarrying && (carryingBody != null))
+        {
+            if (Input.GetKeyUp(KeyCode.R)) { dropBody(carryingBody); }
         }
         if (nearestWindow != null)
         {
@@ -213,6 +234,52 @@ public class PlayerController : MonoBehaviour
         return nearestItem;
     }
 
+    IEnumerator cRun()
+    {
+        moveSpeed *= 1.6f;
+
+        Stamina_Box.enabled = true;
+        Stamina_Bar.enabled = true;
+
+        float spare = Stamina_Bar.fillAmount; // 스태미너 남은 값부터 시작
+        float timer = 0f;
+
+        while (true)
+        {
+            if (Stamina_Bar.fillAmount <= 0) break;
+            if (!isRunning) break;
+            timer += Time.deltaTime;
+            float normalizedTimer = Mathf.Clamp(timer / (spare * 5f), 0f, 1f); // 타이머 값을 0과 1 사이로 정규화
+            Stamina_Bar.fillAmount = Mathf.Lerp(spare, 0f, normalizedTimer);
+            yield return null;
+        }
+        Debug.Log("cRun 에서 while (true) 루프 탈출");
+        refillStaminaCoroutine = StartCoroutine(cRefillStamina());
+    }
+    IEnumerator cRefillStamina()
+    {
+        moveSpeed *= 0.625f;
+        isRunning = false;
+
+        float spare = Stamina_Bar.fillAmount; // 스태미너 남은 값부터 시작
+        float timer = 0f;
+
+        while (true)
+        {
+            if (Stamina_Bar.fillAmount >= 1) break;
+            if (isRunning) yield break;
+            timer += Time.deltaTime;
+            float normalizedTimer = Mathf.Clamp(timer / ((1 - spare) * 12f), 0f, 1f); // 타이머 값을 0과 1 사이로 정규화
+            Stamina_Bar.fillAmount = Mathf.Lerp(spare, 1f, normalizedTimer);
+            yield return null;
+        }
+
+        Stamina_Box.enabled = false;
+        Stamina_Bar.enabled = false;
+        refillStaminaCoroutine = null;
+    }
+    void startRun() { isRunning = true; StartCoroutine(cRun()); }
+
     void killNpc(GameObject target)
     {
         if (target != null) { target.GetComponent<NPCController>().fDead(); }
@@ -226,6 +293,7 @@ public class PlayerController : MonoBehaviour
     }
     IEnumerator cCarryBody(GameObject body)
     {
+        moveSpeed *= 0.625f;
         while (true)
         {
             if (!isCarrying) { yield break; }
@@ -244,12 +312,14 @@ public class PlayerController : MonoBehaviour
     }
     void dropBody(GameObject body)
     {
+        moveSpeed *= 1.6f;
         body.transform.position = new Vector3(body.transform.position.x, 0f, body.transform.position.z);
         isCarrying = false;
         carryingBody = null;
     }
     void hideBody(GameObject body)
     {
+        moveSpeed *= 1.6f;
         isCarrying = false;
         carryingBody = null;
         if (body.CompareTag("NPC"))
@@ -265,12 +335,12 @@ public class PlayerController : MonoBehaviour
     public void inChased()
     {
         isChased = true;
-        // 플레이어 위에 수갑 아이콘 띄우기
+        HandCuff.enabled = true;
     }
     public void outChased()
     {
         isChased = false;
-        // 플레이어 위에 수갑 아이콘 지우기
+        HandCuff.enabled = false;
     }
     public bool getChased() { return isChased; }
 }
