@@ -37,7 +37,7 @@ public class ParamedicController : MonoBehaviour
     }
 
     // Come 상태 구현
-    GameObject findNearestShortcut(List<GameObject> corpses)
+    GameObject findNearestCorpse(List<GameObject> corpses)
     {
         GameObject minCorpse = Corpses[0];
         float minDist = float.MaxValue;
@@ -50,7 +50,7 @@ public class ParamedicController : MonoBehaviour
     }
     IEnumerator cCome()
     {
-        GameObject destCorpse = findNearestShortcut(Corpses);
+        GameObject destCorpse = findNearestCorpse(Corpses);
         while (true)
         {
             agent.SetDestination(destCorpse.transform.position);

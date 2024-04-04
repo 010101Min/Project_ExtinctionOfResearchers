@@ -143,15 +143,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   Corpse: {fileID: 0}
-  aliveState: {fileID: 0}
-  Poisoned: {fileID: 0}
-  Blinded: {fileID: 0}
-  Sleeping: {fileID: 0}
-  deadState: {fileID: 0}
-  Dead: {fileID: 0}
-  Detected: {fileID: 0}
-  isDetected: 0
-  isDead: 0
+  aliveStatePrefab: {fileID: 533936645943300388, guid: 4d3f20be27a465e459e8a2376e249f7b, type: 3}
+  deadStatePrefab: {fileID: 2303710154359130432, guid: 440ecd076fccba34c9592b66eea8929c, type: 3}
   player: {fileID: 0}
   pos:
   - {fileID: 0}

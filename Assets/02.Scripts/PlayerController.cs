@@ -253,7 +253,6 @@ public class PlayerController : MonoBehaviour
             Stamina_Bar.fillAmount = Mathf.Lerp(spare, 0f, normalizedTimer);
             yield return null;
         }
-        Debug.Log("cRun 에서 while (true) 루프 탈출");
         refillStaminaCoroutine = StartCoroutine(cRefillStamina());
     }
     IEnumerator cRefillStamina()

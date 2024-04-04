@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 public class PoliceController : MonoBehaviour
 {
@@ -26,6 +27,8 @@ public class PoliceController : MonoBehaviour
     public List<GameObject> Corpse = new List<GameObject>();
     private GameObject policeCar;
     private GameObject player;
+    public ScrollRect deadStatePrefab;
+    private ScrollRect deadStateImage = null;
 
     private int chaseTime = 0;
     private bool isDead = false;
@@ -51,6 +54,9 @@ public class PoliceController : MonoBehaviour
         npcLayer = 1 << LayerMask.NameToLayer("NPC");
         corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
+
+        StartCoroutine(cSetDeadIcons());
+        deadStateImage.enabled = false;
     }
 
     void Update()
@@ -122,6 +128,17 @@ public class PoliceController : MonoBehaviour
         returnCoroutine = false;
     }
 
+    // UI 사망 아이콘용 함수
+    IEnumerator cSetDeadIcons()
+    {
+        deadStateImage = Instantiate(deadStatePrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
+        while (true)
+        {
+            if (deadStateImage != null) { deadStateImage.GetComponent<DeadIconController>().setNpc(this.gameObject); break; }
+            yield return null;
+        }
+        yield break;
+    }
     // 사망시 불러올 함수
     public void fDead()
     {
@@ -130,18 +147,19 @@ public class PoliceController : MonoBehaviour
         isDead = true;
         agent.enabled = false;
         isCarriable = true;
+        if (!deadStateImage.gameObject.activeSelf) { deadStateImage.enabled = true; }
+        deadStateImage.GetComponent<DeadIconController>().showDead();
         gameObject.layer = LayerMask.NameToLayer("CORPSE");
-        //gameObject.tag = "NPC";
         state = State.DIE;
     }
     public bool getDead() { return isDead; }
     // 시신 발견시 불러올 함수
     public void fDetected()
     {
-        // 시신 위에 경광등 띄우기
+        if (!deadStateImage.gameObject.activeSelf) { deadStateImage.enabled = true; }
+        deadStateImage.GetComponent<DeadIconController>().showDetected();
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         isCarriable = false;
-        //gameObject.GetComponent<PoliceController>().isDetected = true;
         isDetected = true;
     }
     public bool fGetDetected() { return isDetected; }
@@ -157,7 +175,6 @@ public class PoliceController : MonoBehaviour
             // 게임매니저에서 킬 수 올리기 필요
         }
         StartCoroutine(cHide());
-        //Destroy(gameObject);
     }
     IEnumerator cHide()
     {
@@ -167,6 +184,7 @@ public class PoliceController : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+        Destroy(deadStateImage.gameObject);
         Destroy(gameObject);
     }
     public bool fGetCarriable() { return isCarriable; }
@@ -175,8 +193,8 @@ public class PoliceController : MonoBehaviour
     public void fResolved()
     {
         initCoroutine();
-        // 아직 이펙트 없어서 임시로 삭제
-        //Destroy(gameObject);
+        this.gameObject.tag = "Uninteractable";
+        this.enabled = false;
     }
 
     // 신고 함수
@@ -192,7 +210,6 @@ public class PoliceController : MonoBehaviour
         if (suspect == reporter)
         {
             Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse);
-            //if ((state == State.WAIT) || (state == State.RETURN)) ChangeState(State.RESOLVE);
             if (!((state == State.RETURN) && (oldState == State.CHASE))) ChangeState(State.RESOLVE);
         }
         else
@@ -284,7 +301,11 @@ public class PoliceController : MonoBehaviour
 
         Debug.Log("추격 시작 / 추격 대상 : " + Suspect.name);
         if (Suspect.Equals(player)) { player.GetComponent<PlayerController>().inChased(); }
-        else { player.GetComponent<PlayerController>().outChased(); }
+        else
+        {
+            player.GetComponent<PlayerController>().outChased();
+            Suspect.GetComponent<NPCController>().sadfasdsaf
+        }
 
         while ((elapsedTime < chaseTime) && (Suspect != null))
         {
