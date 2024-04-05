@@ -29,7 +29,6 @@ public class NPCController : MonoBehaviour
     private bool isDetected = false;
     private bool isDead = false;
     private bool isArrested = false;
-    private bool isChased = false;
     private bool isHidden = false;
     private bool provokable = true;
     private bool witnessable = true;
@@ -400,7 +399,6 @@ public class NPCController : MonoBehaviour
             if (corpse.GetComponent<NPCController>().fGetHidden())
             {
                 if (!fCheckSuspect(suspect)) { fGiveUp(tempProvokable); }
-                else corpse = null;
             }
         }
         else if (corpse.CompareTag("Police"))
@@ -408,7 +406,6 @@ public class NPCController : MonoBehaviour
             if (corpse.GetComponent<PoliceController>().fGetHidden())
             {
                 if (!fCheckSuspect(suspect)) { fGiveUp(tempProvokable); }
-                else corpse = null;
             }
         }
     }
@@ -493,7 +490,7 @@ public class NPCController : MonoBehaviour
         }
 
         // 신고할 위치에 가장 먼저 도착한 한 명만 신고하도록
-        GameManager.Instance.Report(this.gameObject, corpse, Suspect);
+        OneGameManager.Instance.Report(this.gameObject, corpse, Suspect);
 
         // 원래대로 속성 돌리기
         fGiveUp(tempProvokable);
@@ -501,6 +498,7 @@ public class NPCController : MonoBehaviour
 
     // Provoked 상태 구현
     private void fProvoked() { initCoroutine(); provokedCoroutine = StartCoroutine(cProvoked()); }
+    public bool fGetProvoked() { return provokable; }
     IEnumerator cProvoked()
     {
         agent.enabled = true;

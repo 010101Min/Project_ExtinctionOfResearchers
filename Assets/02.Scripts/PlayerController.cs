@@ -80,23 +80,41 @@ public class PlayerController : MonoBehaviour
 
         findObject(out nearestNPC, out nearestBomb, out nearestWindow, out nearestShortcut, out nearestCarriable);
 
+        OneGameUIController.Instance.Clearall();
         if (nearestNPC != null)
         {
-            // E, Q 키 작동 가능하다고 UI에 띄우기
+            Debug.Log("공격 가능 대상 있음");
+            OneGameUIController.Instance.InAttack();
+            if (Input.GetKeyDown(KeyCode.E)) { killNpc(nearestNPC); }
+            if (nearestNPC.GetComponent<NPCController>().fGetProvoked())
+            {
+                OneGameUIController.Instance.InProvoke();
+                if (Input.GetKeyDown(KeyCode.Q)) { provokeNpc(nearestNPC); }
+            }
             
         }
         if (nearestBomb != null)
         {
-            // 함정 작동 가능하다고 UI에 띄우기
+            switch (nearestBomb.GetComponent<BombController>().state)
+            {
+                case BombController.State.BOMB:
+                    OneGameUIController.Instance.InBomb();
+                    break;
+                case BombController.State.FIREEXTINGUISHER:
+                    OneGameUIController.Instance.InFire();
+                    break;
+                default:
+                    OneGameUIController.Instance.InPoison();
+                    break;
+            }
             if (Input.GetKeyUp(KeyCode.Space))
             {
                 if (nearestBomb.GetComponent<BombController>() != null) { nearestBomb.GetComponent<BombController>().UseBomb(); }
             }
-            
         }
         if (nearestShortcut != null)
         {
-            // 지름길 작동 가능하다고 UI에 띄우기
+            OneGameUIController.Instance.InShortcut();
             if (Input.GetKeyUp(KeyCode.Space))
             {
                 Transform newTrans = nearestShortcut.GetComponent<ShortCutController>().UseShortCut(this.gameObject);
@@ -109,7 +127,7 @@ public class PlayerController : MonoBehaviour
         }
         if ((nearestCarriable != null) && (!isCarrying) && (carryingBody == null))  // 들 수 있는 게 근처에 있고 지금 들고 있는 게 없으면
         {
-            // 캐릭터 운반 가능하다고 UI에 띄우기
+            OneGameUIController.Instance.InCarry();
             if (Input.GetKeyUp(KeyCode.R))
             {
                 isCarrying = true;
@@ -119,19 +137,17 @@ public class PlayerController : MonoBehaviour
         }
         else if (isCarrying && (carryingBody != null))
         {
+            OneGameUIController.Instance.InDrop();
             if (Input.GetKeyUp(KeyCode.R)) { dropBody(carryingBody); }
         }
         if (nearestWindow != null)
         {
-            // 은닉처 작동 가능하다고 UI에 띄우기
-            if (isCarrying && (Input.GetKeyUp(KeyCode.Space)))
+            if (isCarrying)
             {
-                hideBody(carryingBody);
+                OneGameUIController.Instance.InAbandon();
+                if (Input.GetKeyUp(KeyCode.Space)) { hideBody(carryingBody); }
             }
         }
-
-        if (Input.GetKeyDown(KeyCode.E)) { killNpc(nearestNPC); }
-        if (Input.GetKeyDown(KeyCode.Q)) { provokeNpc(nearestNPC); }
     }
 
     void findObject(out GameObject nearestNPC, out GameObject nearestBomb, out GameObject nearestWindow, out GameObject nearestShortcut, out GameObject nearestCarriable)

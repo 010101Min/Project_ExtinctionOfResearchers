@@ -206,9 +206,8 @@ public class PoliceController : MonoBehaviour
     {
         if (corpse != null)
         {
-            if (corpse.CompareTag("NPC")) corpse.GetComponent<NPCController>().fDetected();
-            if (corpse.CompareTag("Police")) corpse.GetComponent<PoliceController>().fDetected();
-            Corpse.Add(corpse);
+            if (corpse.CompareTag("NPC")) { if (!corpse.GetComponent<NPCController>().fGetHidden()) { corpse.GetComponent<NPCController>().fDetected(); Corpse.Add(corpse); } }
+            if (corpse.CompareTag("Police")) { if (!corpse.GetComponent<PoliceController>().fGetHidden()) { corpse.GetComponent<PoliceController>().fDetected(); Corpse.Add(corpse); } }
         }
         chaseTime = time;
         if (suspect == reporter)
@@ -243,6 +242,7 @@ public class PoliceController : MonoBehaviour
                 {
                     if (tempCorpse.CompareTag("NPC")) tempCorpse.GetComponent<NPCController>().fDetected();
                     if (tempCorpse.CompareTag("Police")) tempCorpse.GetComponent<PoliceController>().fDetected();
+                    LineController.Instance.DrawLine(this.gameObject, this.transform, tempCorpse.transform);
                     Debug.Log("시신 목격 " + tempCorpse.name);
                     Corpse.Add(tempCorpse);
                     // Chase 중이었다면 타겟 바꾸지 않고 계속 추격, Chase 중이 아니었다면 용의자 추적
@@ -280,7 +280,6 @@ public class PoliceController : MonoBehaviour
             Debug.Log("용의자 : " + tempSuspect.name);
         }
 
-        LineController.Instance.DrawLine(this.gameObject, this.transform, corpse.transform);
         if (tempSuspect != this.gameObject)
         {
             LineController.Instance.DrawLine(this.gameObject, corpse.transform, tempSuspect.transform);
@@ -389,7 +388,7 @@ public class PoliceController : MonoBehaviour
             yield return null;
         }
         transform.position = policeCar.transform.position;
-        GameManager.Instance.plusCorpse(Corpse);
+        OneGameManager.Instance.plusCorpse(Corpse);
         cWait();
     }
     // Wait 상태 구현 (임시)

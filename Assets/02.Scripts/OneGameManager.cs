@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-public class GameManager : MonoBehaviour
+public class OneGameManager : MonoBehaviour
 {
-    public static GameManager Instance;
+    public static OneGameManager Instance;
 
     private bool isGameOver = false;
     private bool isGamePaused = false;
@@ -32,7 +32,10 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            OneGameUIController.Instance.showOptionPanel();
+        }
     }
 
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect)

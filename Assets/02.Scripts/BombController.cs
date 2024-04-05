@@ -9,7 +9,6 @@ using UnityEngine.UI;
 public class BombController : MonoBehaviour
 {
     //public GameObject ExplosionEffect;
-    //public Image CountBar;
     public Image defaultBombIcon;
     public Image poisonBombIcon;
     public Image fireBombIcon;

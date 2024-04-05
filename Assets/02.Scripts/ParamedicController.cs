@@ -39,10 +39,15 @@ public class ParamedicController : MonoBehaviour
     // Come 상태 구현
     GameObject findNearestCorpse(List<GameObject> corpses)
     {
+        if (corpses.Count == 0) { return null; }
         GameObject minCorpse = Corpses[0];
         float minDist = float.MaxValue;
         foreach (GameObject corpse in corpses)
         {
+            //if (corpses.Count == 0) break;
+            //if (corpse == null) { corpses.Remove(corpse); break; }
+            //if (corpse.CompareTag("NPC") && corpse.GetComponent<NPCController>().fGetHidden()) { corpses.Remove(corpse); break; }
+            //else if (corpse.CompareTag("Police") && corpse.GetComponent<PoliceController>().fGetHidden()) { corpses.Remove(corpse); break; }
             float distance = Vector3.Distance(this.transform.position, corpse.transform.position);
             if (distance <= minDist) { minCorpse = corpse; }
         }
@@ -53,6 +58,7 @@ public class ParamedicController : MonoBehaviour
         GameObject destCorpse = findNearestCorpse(Corpses);
         while (true)
         {
+            if (destCorpse == null) break;
             agent.SetDestination(destCorpse.transform.position);
             if ((transform.position - destCorpse.transform.position).magnitude <= 1f) { break; }
             yield return null;

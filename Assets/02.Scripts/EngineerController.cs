@@ -16,7 +16,7 @@ public class EngineerController : MonoBehaviour
     public State state = State.WAIT;
     public GameObject home;
 
-    private float fSabotageTime = 0f;
+    private float fSabotageTime = 15f;
 
     private NavMeshAgent agent;
     private Animator anim;
@@ -67,7 +67,7 @@ public class EngineerController : MonoBehaviour
     {
         float elapsedTime = 0f;
 
-        while (elapsedTime < 5f)
+        while (elapsedTime < fSabotageTime)
         {
             elapsedTime += Time.deltaTime;
             yield return null;

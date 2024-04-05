@@ -19,7 +19,7 @@ public class ShortCutController : MonoBehaviour
         
         if (player.GetComponent<PlayerController>().getChased() && !reported)
         {
-            GameManager.Instance.DestroyShortCut(this.gameObject);
+            OneGameManager.Instance.DestroyShortCut(this.gameObject);
             reported = true;
         }
 
