@@ -9,7 +9,10 @@ using UnityEngine.UI;
 public class BombController : MonoBehaviour
 {
     //public GameObject ExplosionEffect;
-    public Image CountBar;
+    //public Image CountBar;
+    public Image defaultBombIcon;
+    public Image poisonBombIcon;
+    public Image fireBombIcon;
     private GameObject player;
     private bool isUsable = true;
     float explosionTimer = 10f;
@@ -74,14 +77,16 @@ public class BombController : MonoBehaviour
     {
         float timer = 0f;
         Debug.Log("함정 작동");
-        CountBar.fillAmount = 1f;
-        while (CountBar.fillAmount > 0)
+        Image bombIcon = Instantiate(defaultBombIcon, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
+        bombIcon.fillAmount = 1f;
+        while (bombIcon.fillAmount > 0)
         {
-            CountBar.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
+            bombIcon.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
             timer += Time.deltaTime;
-            CountBar.fillAmount = Mathf.Lerp(1f, 0f, timer / explosionTimer);
+            bombIcon.fillAmount = Mathf.Lerp(1f, 0f, timer / explosionTimer);
             yield return null;
         }
+        Destroy(bombIcon.gameObject);
         // 폭발
         fBombExplosion();
     }
@@ -129,9 +134,10 @@ public class BombController : MonoBehaviour
         int corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
         int invisiblecorpseLayer = 1 << LayerMask.NameToLayer("INVISIBLECORPSE");
         int wallLayer = 1 << LayerMask.NameToLayer("WALL");
-        CountBar.fillAmount = 1f;
+        Image fireIcon = Instantiate(fireBombIcon, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
+        fireIcon.fillAmount = 1f;
 
-        while (CountBar.fillAmount > 0)
+        while (fireIcon.fillAmount > 0)
         {
             // 살아있는 npc부터 찾기
             Collider[] targets1 = Physics.OverlapSphere(transform.position, 12f, (npcLayer | invisiblenpcLayer));
@@ -154,12 +160,13 @@ public class BombController : MonoBehaviour
                 if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, wallLayer)) { target.gameObject.layer = LayerMask.NameToLayer("INVISIBLECORPSE"); }
             }
 
-            CountBar.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
+            fireIcon.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
             timer += Time.deltaTime;
-            CountBar.fillAmount = Mathf.Lerp(1f, 0f, timer / blindTimer);
+            fireIcon.fillAmount = Mathf.Lerp(1f, 0f, timer / blindTimer);
             yield return null;
         }
 
+        Destroy(fireIcon.gameObject);
         Collider[] blindnpcs = Physics.OverlapSphere(transform.position, 12f, invisiblenpcLayer);
         for (int i = 0; i < blindnpcs.Length; i++) { blindnpcs[i].GetComponent<NPCController>().fOutBlinded(); }    // NPC가 실명 상태 회복
         Collider[] blindcorpses = Physics.OverlapSphere(transform.position, 10f, invisiblecorpseLayer);
@@ -175,9 +182,10 @@ public class BombController : MonoBehaviour
         int npcLayer = 1 << LayerMask.NameToLayer("NPC");
         int invisiblenpcLayer = 1 << LayerMask.NameToLayer("INVISIBLENPC");
         int wallLayer = 1 << LayerMask.NameToLayer("WALL");
-        CountBar.fillAmount = 1f;
+        Image poisonIcon = Instantiate(poisonBombIcon, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
+        poisonIcon.fillAmount = 1f;
 
-        while (CountBar.fillAmount > 0)
+        while (poisonIcon.fillAmount > 0)
         {
             Collider[] targets1 = Physics.OverlapSphere(transform.position, 12f, (npcLayer | invisiblenpcLayer));
             for (int i = 0; i < targets1.Length; i++)
@@ -204,12 +212,13 @@ public class BombController : MonoBehaviour
                     }
                 }
             }
-            CountBar.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
+            poisonIcon.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
             timer += Time.deltaTime;
-            CountBar.fillAmount = Mathf.Lerp(1f, 0f, timer / poisonTimer);
+            poisonIcon.fillAmount = Mathf.Lerp(1f, 0f, timer / poisonTimer);
             yield return null;
         }
 
+        Destroy(poisonIcon.gameObject);
         Collider[] poisonednpcs = Physics.OverlapSphere(transform.position, 12f, (npcLayer | invisiblenpcLayer));
         for (int i = 0; i < poisonednpcs.Length; i++) { StopCoroutine(cPoison(poisonednpcs[i].gameObject)); }
     }
