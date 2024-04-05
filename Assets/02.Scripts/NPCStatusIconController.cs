@@ -5,10 +5,8 @@ using UnityEngine.UI;
 
 public class NPCStatusIconController : MonoBehaviour
 {
-    public GameObject AliveStatusPrefab;
-    public GameObject DeadStatusPrefab;
-    private GameObject aliveStatus;
-    private GameObject deadStatus;
+    public GameObject AliveStatus;
+    public GameObject DeadStatus;
 
     private GameObject npc;
 
@@ -18,9 +16,9 @@ public class NPCStatusIconController : MonoBehaviour
     private GameObject BlindedImage = null;
     private GameObject SleepingImage = null;
 
-    float minScale = 0.5f; // 최소 스케일 값
-    float maxScale = 1.0f; // 최대 스케일 값
-    float maxDistance = 20f;
+    float minScale = 0.1f; // 최소 스케일 값
+    float maxScale = 0.75f; // 최대 스케일 값
+    float maxDistance = 60f;
 
     private Camera mainCamera;
     private int wallLayer;
@@ -30,14 +28,11 @@ public class NPCStatusIconController : MonoBehaviour
         mainCamera = Camera.main;
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
 
-        aliveStatus = Instantiate(AliveStatusPrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
-        deadStatus = Instantiate(DeadStatusPrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
-
-        PoisonedImage = aliveStatus.transform.Find("Viewport/Content/Poisoned").gameObject;
-        BlindedImage = aliveStatus.transform.Find("Viewport/Content/Blinded").gameObject;
-        SleepingImage = aliveStatus.transform.Find("Viewport/Content/Sleeping").gameObject;
-        DeadImage = deadStatus.transform.Find("Viewport/Content/Dead").gameObject;
-        DetectedImage = deadStatus.transform.Find("Viewport/Content/Detected").gameObject;
+        PoisonedImage = AliveStatus.transform.Find("Viewport/Content/Poisoned").gameObject;
+        BlindedImage = AliveStatus.transform.Find("Viewport/Content/Blinded").gameObject;
+        SleepingImage = AliveStatus.transform.Find("Viewport/Content/Sleeping").gameObject;
+        DeadImage = DeadStatus.transform.Find("Viewport/Content/Dead").gameObject;
+        DetectedImage = DeadStatus.transform.Find("Viewport/Content/Detected").gameObject;
 
         PoisonedImage.SetActive(false);
         BlindedImage.SetActive(false);
@@ -45,8 +40,8 @@ public class NPCStatusIconController : MonoBehaviour
         DeadImage.SetActive(false);
         DetectedImage.SetActive(false);
 
-        aliveStatus.SetActive(false);
-        deadStatus.SetActive(false);
+        AliveStatus.SetActive(false);
+        DeadStatus.SetActive(false);
     }
 
     void Update()
@@ -56,26 +51,25 @@ public class NPCStatusIconController : MonoBehaviour
             // 기본적으로 오브젝트 위에 떠있음
             transform.position = Camera.main.WorldToScreenPoint(new Vector3(npc.transform.position.x, npc.transform.position.y + 1f, npc.transform.position.z));
 
-            // 카메라와의 거리에 따라 스케일 조정
             float distance = Vector3.Distance(npc.gameObject.transform.position, mainCamera.transform.position);
             float scaleRatio = Mathf.Clamp(1 - (distance / maxDistance), minScale, maxScale);
             this.gameObject.transform.localScale = new Vector3(scaleRatio, scaleRatio, scaleRatio);
+
+            if (distance > 100f) { AliveStatus.SetActive(false); DeadStatus.SetActive(false); return; }
 
             // 카메라와 UI 사이에 벽이 있는지 확인
             RaycastHit hit;
             if (Physics.Raycast(mainCamera.transform.position, (npc.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer))
             {
                 // 벽에 가려졌을 경우 UI 요소 숨김
-                Debug.Log("벽에 가려짐 판정");
-                aliveStatus.SetActive(false);
-                deadStatus.SetActive(false);
+                AliveStatus.SetActive(false);
+                DeadStatus.SetActive(false);
             }
             else
             {
                 // 벽에 가려지지 않았을 경우 UI 요소 보임
-                Debug.Log("벽에 안 가려짐 판정");
-                aliveStatus.SetActive(true);
-                deadStatus.SetActive(true);
+                AliveStatus.SetActive(true);
+                DeadStatus.SetActive(true);
             }
         }
     }
@@ -84,34 +78,25 @@ public class NPCStatusIconController : MonoBehaviour
 
     public void showDead()
     {
-        aliveStatus.SetActive(false);
-        deadStatus.SetActive(true);
+        PoisonedImage.SetActive(false);
+        BlindedImage.SetActive(false);
+        SleepingImage.SetActive(false);
         DeadImage.SetActive(true);
         DetectedImage.SetActive(false);
     }
     public void showDetected()
     {
-        showDead();
+        PoisonedImage.SetActive(false);
+        BlindedImage.SetActive(false);
+        SleepingImage.SetActive(false);
         DeadImage.SetActive(false);
         DetectedImage.SetActive(true);
     }
 
-    public void showPoisoned()
-    {
-        if (!aliveStatus.activeSelf) { aliveStatus.SetActive(true); }
-        PoisonedImage.SetActive(true);
-    }
+    public void showPoisoned() { PoisonedImage.SetActive(true); }
     public void showPoisonedPercent(float percent) { PoisonedImage.GetComponent<Image>().fillAmount = percent; }
-    public void showBlinded()
-    {
-        if (!aliveStatus.activeSelf) { aliveStatus.SetActive(true); }
-        BlindedImage.SetActive(true);
-    }
+    public void showBlinded() { BlindedImage.SetActive(true); }
     public void showOutBlinded() { BlindedImage.SetActive(false); }
-    public void showSleeping()
-    {
-        if (!aliveStatus.activeSelf) { aliveStatus.SetActive(true); }
-        SleepingImage.SetActive(true);
-    }
+    public void showSleeping() { SleepingImage.SetActive(true); }
     public void showOutSleeping() { SleepingImage.SetActive(false); }
 }

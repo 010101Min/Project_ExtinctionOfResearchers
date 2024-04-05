@@ -64,7 +64,7 @@ public class GameManager : MonoBehaviour
     public void plusCorpse(List<GameObject> corpses)
     {
         foreach(GameObject corpse in corpses) { Corpses.Add(corpse); }
-        if (corpses.Count >= 3) { ParamedicReport(Corpses); Corpses = null; }
+        if (corpses.Count >= 3) { ParamedicReport(Corpses); Corpses.Clear(); }
     }
 
     public void DestroyShortCut(GameObject shortCut)

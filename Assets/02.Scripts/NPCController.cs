@@ -21,11 +21,8 @@ public class NPCController : MonoBehaviour
     private GameObject Suspect = null;
     public GameObject Corpse = null;
 
-    public ScrollRect aliveStatePrefab;
-    public ScrollRect deadStatePrefab;
-
-    private ScrollRect aliveStateImage = null;
-    private ScrollRect deadStateImage = null;
+    public GameObject Icon;
+    private GameObject icon = null;
 
     private bool isPoisoned = false;
     private bool isCarriable = false;
@@ -71,10 +68,7 @@ public class NPCController : MonoBehaviour
         corpseLayer = 1 << LayerMask.NameToLayer("CORPSE");
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
 
-        StartCoroutine(cSetAliveIcons());
-        aliveStateImage.enabled = false;
-        StartCoroutine(cSetDeadIcons());
-        deadStateImage.enabled = false;
+        StartCoroutine(cSetIcons());
     }
 
     void Update()
@@ -127,22 +121,12 @@ public class NPCController : MonoBehaviour
     }
 
     // UI 아이콘들용 함수
-    IEnumerator cSetDeadIcons()
+    IEnumerator cSetIcons()
     {
-        deadStateImage = Instantiate(deadStatePrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
+        icon = Instantiate(Icon, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
         while (true)
         {
-            if (deadStateImage != null) { deadStateImage.GetComponent<DeadIconController>().setNpc(this.gameObject); break; }
-            yield return null;
-        }
-        yield break;
-    }
-    IEnumerator cSetAliveIcons()
-    {
-        aliveStateImage = Instantiate(aliveStatePrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
-        while (true)
-        {
-            if (aliveStateImage != null) { aliveStateImage.GetComponent<AliveIconController>().setNpc(this.gameObject); break; }
+            if (icon != null) { icon.GetComponent <NPCStatusIconController>().setNpc(this.gameObject); break; }
             yield return null;
         }
         yield break;
@@ -196,9 +180,7 @@ public class NPCController : MonoBehaviour
         isCarriable = true;
         witnessable = false;
         gameObject.layer = LayerMask.NameToLayer("CORPSE");
-        if (aliveStateImage.gameObject.activeSelf) { aliveStateImage.GetComponent<AliveIconController>().fInvisible(); }
-        if (!deadStateImage.gameObject.activeSelf) { deadStateImage.enabled = true; }
-        deadStateImage.GetComponent<DeadIconController>().showDead();
+        icon.GetComponent<NPCStatusIconController>().showDead();
         // 게임매니저에서 킬 수 올리기 필요
         state = State.DIE;
     }
@@ -207,14 +189,13 @@ public class NPCController : MonoBehaviour
     // 시야 잃을 시 불러올 함수
     public void fGetBlinded()
     {
-        if (!aliveStateImage.gameObject.activeSelf) { aliveStateImage.enabled = true; }
-        aliveStateImage.GetComponent<AliveIconController>().showBlinded();
+        icon.GetComponent<NPCStatusIconController>().showBlinded();
         witnessable = false;
         gameObject.layer = LayerMask.NameToLayer("INVISIBLENPC");
     }
     public void fOutBlinded()
     {
-        aliveStateImage.GetComponent<AliveIconController>().showOutBlinded();
+        icon.GetComponent<NPCStatusIconController>().showOutBlinded();
         witnessable = true;
         gameObject.layer = LayerMask.NameToLayer("NPC");
     }
@@ -224,12 +205,11 @@ public class NPCController : MonoBehaviour
     public void fSetPoisoned(float percent)
     {
         fPoisoned = percent;
-        aliveStateImage.GetComponent<AliveIconController>().showPoisonedPercent(percent);
+        icon.GetComponent<NPCStatusIconController>().showPoisonedPercent(percent);
     }
     public void fIfInPoisoned()
     {
-        if (!aliveStateImage.gameObject.activeSelf) { aliveStateImage.enabled = true; }
-        aliveStateImage.GetComponent<AliveIconController>().showPoisoned();
+        icon.GetComponent<NPCStatusIconController>().showPoisoned();
         isPoisoned = true;
     }
     public void fIfOutPoisoned() { isPoisoned = false; }
@@ -242,7 +222,7 @@ public class NPCController : MonoBehaviour
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         isCarriable = false;
         isDetected = true;
-        deadStateImage.GetComponent<DeadIconController>().showDetected();
+        icon.GetComponent<NPCStatusIconController>().showDetected();
     }
     public bool fGetDetected() { return isDetected; }
 
@@ -263,8 +243,7 @@ public class NPCController : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        Destroy(aliveStateImage.gameObject);
-        Destroy(deadStateImage.gameObject);
+        Destroy(icon.gameObject);
         Destroy(gameObject);
     }
     public bool fGetCarriable() { return isCarriable; }
@@ -340,8 +319,7 @@ public class NPCController : MonoBehaviour
     private void fSleep() { initCoroutine(); sleepCoroutine = StartCoroutine(cSleep()); }
     IEnumerator cSleep()
     {
-        if (!aliveStateImage.gameObject.activeSelf) { aliveStateImage.enabled = true; }
-        aliveStateImage.GetComponent<AliveIconController>().showSleeping();
+        icon.GetComponent<NPCStatusIconController>().showSleeping();
 
         agent.enabled = false;
         int tempfProvoke = fProvoke;
@@ -355,7 +333,7 @@ public class NPCController : MonoBehaviour
         witnessable = true;
         fProvoke = tempfProvoke;
         isCarriable = false;
-        aliveStateImage.GetComponent<AliveIconController>().showOutSleeping();
+        icon.GetComponent<NPCStatusIconController>().showOutSleeping();
 
         sleepCoroutine = null;
         int nextState = Random.Range(1, 101);

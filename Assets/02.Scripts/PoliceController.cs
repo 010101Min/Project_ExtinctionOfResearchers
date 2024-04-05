@@ -29,8 +29,9 @@ public class PoliceController : MonoBehaviour
     private GameObject player;
     public GameObject handCuffPrefab;
     private GameObject handCuff = null;
-    public ScrollRect deadStatePrefab;
-    private ScrollRect deadStateImage = null;
+
+    public GameObject deadStatePrefab;
+    private GameObject deadState;
 
     private int chaseTime = 0;
     private bool isDead = false;
@@ -58,7 +59,6 @@ public class PoliceController : MonoBehaviour
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
 
         StartCoroutine(cSetDeadIcons());
-        deadStateImage.enabled = false;
     }
 
     void Update()
@@ -133,10 +133,14 @@ public class PoliceController : MonoBehaviour
     // UI 사망 아이콘용 함수
     IEnumerator cSetDeadIcons()
     {
-        deadStateImage = Instantiate(deadStatePrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
+        deadState = Instantiate(deadStatePrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
         while (true)
         {
-            if (deadStateImage != null) { deadStateImage.GetComponent<DeadIconController>().setNpc(this.gameObject); break; }
+            if (deadState != null)
+            {
+                deadState.GetComponent<DeadIconController>().setNpc(this.gameObject);
+                break;
+            }
             yield return null;
         }
         yield break;
@@ -149,8 +153,7 @@ public class PoliceController : MonoBehaviour
         isDead = true;
         agent.enabled = false;
         isCarriable = true;
-        if (!deadStateImage.gameObject.activeSelf) { deadStateImage.enabled = true; }
-        deadStateImage.GetComponent<DeadIconController>().showDead();
+        deadState.GetComponent<DeadIconController>().showDead();
         gameObject.layer = LayerMask.NameToLayer("CORPSE");
         state = State.DIE;
     }
@@ -158,8 +161,7 @@ public class PoliceController : MonoBehaviour
     // 시신 발견시 불러올 함수
     public void fDetected()
     {
-        if (!deadStateImage.gameObject.activeSelf) { deadStateImage.enabled = true; }
-        deadStateImage.GetComponent<DeadIconController>().showDetected();
+        deadState.GetComponent<DeadIconController>().showDetected();
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         isCarriable = false;
         isDetected = true;
@@ -186,7 +188,7 @@ public class PoliceController : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        Destroy(deadStateImage.gameObject);
+        Destroy(deadState.gameObject);
         Destroy(gameObject);
     }
     public bool fGetCarriable() { return isCarriable; }

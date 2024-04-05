@@ -14,6 +14,13 @@ public class BombController : MonoBehaviour
     public Image poisonBombIcon;
     public Image fireBombIcon;
     private GameObject player;
+    float minScale = 0.1f; // 최소 스케일 값
+    float maxScale = 0.5f; // 최대 스케일 값
+    float maxDistance = 60f;
+
+    private Camera mainCamera;
+    private int wallLayer;
+
     private bool isUsable = true;
     float explosionTimer = 10f;
     float blindTimer = 20f;
@@ -31,6 +38,8 @@ public class BombController : MonoBehaviour
     private void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+        mainCamera = Camera.main;
+        wallLayer = 1 << LayerMask.NameToLayer("WALL");
     }
 
     public void UseBomb()
@@ -84,6 +93,18 @@ public class BombController : MonoBehaviour
             bombIcon.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
             timer += Time.deltaTime;
             bombIcon.fillAmount = Mathf.Lerp(1f, 0f, timer / explosionTimer);
+
+            float distance = Vector3.Distance(this.gameObject.transform.position, mainCamera.transform.position);
+            RaycastHit hit;
+            // 거리가 100 이상이거나 사이에 벽이 있으면
+            if ((distance > 100f) || (Physics.Raycast(mainCamera.transform.position, (this.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer))) { bombIcon.gameObject.SetActive(false); }
+            else
+            {
+                bombIcon.gameObject.SetActive(true);
+                float scaleRatio = Mathf.Clamp(1 - (distance / maxDistance), minScale, maxScale);
+                bombIcon.gameObject.transform.localScale = new Vector3(scaleRatio, scaleRatio, scaleRatio);
+            }
+
             yield return null;
         }
         Destroy(bombIcon.gameObject);
@@ -161,6 +182,18 @@ public class BombController : MonoBehaviour
             }
 
             fireIcon.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
+
+            float distance = Vector3.Distance(this.gameObject.transform.position, mainCamera.transform.position);
+            RaycastHit hit;
+            // 거리가 100 이상이거나 사이에 벽이 있으면
+            if ((distance > 100f) || (Physics.Raycast(mainCamera.transform.position, (this.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer))) { fireIcon.gameObject.SetActive(false); }
+            else
+            {
+                fireIcon.gameObject.SetActive(true);
+                float scaleRatio = Mathf.Clamp(1 - (distance / maxDistance), minScale, maxScale);
+                fireIcon.gameObject.transform.localScale = new Vector3(scaleRatio, scaleRatio, scaleRatio);
+            }
+
             timer += Time.deltaTime;
             fireIcon.fillAmount = Mathf.Lerp(1f, 0f, timer / blindTimer);
             yield return null;
@@ -213,6 +246,17 @@ public class BombController : MonoBehaviour
                 }
             }
             poisonIcon.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
+            float distance = Vector3.Distance(this.gameObject.transform.position, mainCamera.transform.position);
+            RaycastHit hit;
+            // 거리가 100 이상이거나 사이에 벽이 있으면
+            if ((distance > 100f) || (Physics.Raycast(mainCamera.transform.position, (this.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer))) { poisonIcon.gameObject.SetActive(false); }
+            else
+            {
+                poisonIcon.gameObject.SetActive(true);
+                float scaleRatio = Mathf.Clamp(1 - (distance / maxDistance), minScale, maxScale);
+                poisonIcon.gameObject.transform.localScale = new Vector3(scaleRatio, scaleRatio, scaleRatio);
+            }
+
             timer += Time.deltaTime;
             poisonIcon.fillAmount = Mathf.Lerp(1f, 0f, timer / poisonTimer);
             yield return null;
