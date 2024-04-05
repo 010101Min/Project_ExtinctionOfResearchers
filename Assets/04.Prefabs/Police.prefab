@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   Corpse: []
+  handCuffPrefab: {fileID: 8611929041892924483, guid: c29c37673dfdd57499ba2a7cc859772c, type: 3}
   deadStatePrefab: {fileID: 2303710154359130432, guid: 440ecd076fccba34c9592b66eea8929c, type: 3}
   isDetected: 0
 --- !u!195 &-9202951390946360237

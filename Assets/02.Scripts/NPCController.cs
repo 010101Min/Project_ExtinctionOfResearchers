@@ -32,6 +32,7 @@ public class NPCController : MonoBehaviour
     private bool isDetected = false;
     private bool isDead = false;
     private bool isArrested = false;
+    private bool isChased = false;
     private bool isHidden = false;
     private bool provokable = true;
     private bool witnessable = true;

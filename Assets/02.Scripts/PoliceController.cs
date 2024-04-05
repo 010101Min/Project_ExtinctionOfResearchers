@@ -27,6 +27,8 @@ public class PoliceController : MonoBehaviour
     public List<GameObject> Corpse = new List<GameObject>();
     private GameObject policeCar;
     private GameObject player;
+    public GameObject handCuffPrefab;
+    private GameObject handCuff = null;
     public ScrollRect deadStatePrefab;
     private ScrollRect deadStateImage = null;
 
@@ -304,7 +306,7 @@ public class PoliceController : MonoBehaviour
         else
         {
             player.GetComponent<PlayerController>().outChased();
-            Suspect.GetComponent<NPCController>().sadfasdsaf
+            StartCoroutine(cShowHandcuff());
         }
 
         while ((elapsedTime < chaseTime) && (Suspect != null))
@@ -313,7 +315,12 @@ public class PoliceController : MonoBehaviour
             agent.SetDestination(Suspect.transform.position);
             if ((transform.position - Suspect.transform.position).magnitude <= 2.5f)
             {
-                if (Suspect.CompareTag("NPC")) { Suspect.GetComponent<NPCController>().fArrested(); }
+                if (Suspect.CompareTag("NPC"))
+                {
+                    Suspect.GetComponent<NPCController>().fArrested();
+                    Destroy(handCuff);
+                    handCuff = null;
+                }
                 else
                 {
                     // 플레이어가 잡혔을 때 함수 구현 필요
@@ -392,5 +399,17 @@ public class PoliceController : MonoBehaviour
         resolveCoroutine = false;
         returnCoroutine = false;
         Destroy(this.gameObject);
+    }
+
+    // 수갑 아이콘 제작용 코루틴
+    IEnumerator cShowHandcuff()
+    {
+        handCuff = Instantiate(handCuffPrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
+        while (true)
+        {
+            if (handCuff != null) { handCuff.GetComponent<HandCuffIconController>().setChased(Suspect); break; }
+            yield return null;
+        }
+        yield break;
     }
 }
