@@ -19,6 +19,8 @@ public class OneGameUIController : MonoBehaviour
     public Text AbandonText;
 
     public GameObject OptionPanel;
+    public GameObject GameOverPanel;
+    public GameObject GameClearPanel;
 
     private void Awake()
     {
@@ -30,6 +32,30 @@ public class OneGameUIController : MonoBehaviour
     {
         Clearall();
         ContinueGame();
+    }
+
+    // 각종 버튼 함수들
+    public void ContinueGame() { OptionPanel.gameObject.SetActive(false); }
+    public void RestartGame() { SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
+
+
+    // OptionPanel 함수
+    public void showOptionPanel() { OptionPanel.gameObject.SetActive(true); }
+    
+    // GameOverPanel 함수
+    public void showGameOverPanel(int score)
+    {
+        GameOverPanel.gameObject.SetActive(true);
+        Text scoreText = GameOverPanel.transform.Find("ScoreText").gameObject.GetComponent<Text>();
+        scoreText.text = "SCORE: " + score.ToString();
+    }
+
+    // GameClearPanel 함수
+    public void showGameClearPanel(int score)
+    {
+        GameClearPanel.gameObject.SetActive(true);
+        Text scoreText = GameClearPanel.transform.Find("ScoreText").gameObject.GetComponent<Text>();
+        scoreText.text = "SCORE: " + score.ToString();
     }
 
     public void InAttack() { AttackText.gameObject.SetActive(true); }
@@ -54,8 +80,4 @@ public class OneGameUIController : MonoBehaviour
         PoisonText.gameObject.SetActive(false);
         AbandonText.gameObject.SetActive(false);
     }
-
-    public void showOptionPanel() { OptionPanel.gameObject.SetActive(true); Time.timeScale = 0f; }
-    public void ContinueGame() { OptionPanel.gameObject.SetActive(false); Time.timeScale = 1f; }
-    public void RestartGame() { SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
 }

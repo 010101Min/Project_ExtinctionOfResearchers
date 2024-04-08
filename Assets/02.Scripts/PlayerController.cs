@@ -296,7 +296,7 @@ public class PlayerController : MonoBehaviour
 
     void killNpc(GameObject target)
     {
-        if (target != null) { target.GetComponent<NPCController>().fDead(); }
+        if (target != null) { target.GetComponent<NPCController>().fDead(); OneGameManager.Instance.addScore(30); }
         else { Debug.Log("Å¸°Ù ¾øÀ½"); }
     }
     void provokeNpc(GameObject target)

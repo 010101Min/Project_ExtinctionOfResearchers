@@ -69,6 +69,9 @@ public class NPCController : MonoBehaviour
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
 
         StartCoroutine(cSetIcons());
+
+        int movePos = Random.Range(0, pos.Length);
+        gameObject.transform.position = pos[movePos].position;
     }
 
     void Update()
@@ -79,7 +82,7 @@ public class NPCController : MonoBehaviour
         if ((fPoisoned >= 1) && !isDead)
         {
             DeathTimer += Time.deltaTime;
-            if (DeathTimer >= 30.0f) { fDead(); }
+            if (DeathTimer >= 30.0f) { fDead(); OneGameManager.Instance.addScore(50); }
         }
 
         switch (state)
@@ -104,7 +107,7 @@ public class NPCController : MonoBehaviour
     }
 
     // 연구원 여부 배정
-    private void RandomResearcher()
+    public void RandomResearcher()
     {
 
     }
@@ -229,7 +232,7 @@ public class NPCController : MonoBehaviour
     // 시신 은닉시 불러올 함수
     public void fHide()
     {
-        if (!isDead) { fDead(); }
+        if (!isDead) { fDead(); OneGameManager.Instance.addScore(80); }
         isHidden = true;
         
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
@@ -254,6 +257,7 @@ public class NPCController : MonoBehaviour
     public void fResolved()
     {
         initCoroutine();
+        fHideIcon();
         this.gameObject.tag = "Uninteractable";
         this.enabled = false;
     }

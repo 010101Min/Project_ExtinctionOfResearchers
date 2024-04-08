@@ -216,7 +216,7 @@ public class PoliceController : MonoBehaviour
         if (suspect == reporter)
         {
             Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse);
-            if (!((state == State.RETURN) && (oldState == State.CHASE))) ChangeState(State.RESOLVE);
+            if (oldState != State.CHASE) ChangeState(State.RESOLVE);
         }
         else
         {
@@ -303,7 +303,7 @@ public class PoliceController : MonoBehaviour
         resolveCoroutine = false;
         returnCoroutine = false;
         yield return null;
-        agent.speed = 10f;
+        agent.speed = 11f;
         float elapsedTime = 0f;
 
         Debug.Log("추격 시작 / 추격 대상 : " + Suspect.name);
@@ -422,12 +422,17 @@ public class PoliceController : MonoBehaviour
                 yield break;
             }
             if (body.CompareTag("NPC")) { body.transform.position = carryPos.position; }
-            else { body.transform.position = carryPos.position; }
+            else
+            {
+                body.transform.position = carryPos.position;
+                body.GetComponent<PlayerController>().enabled = false;
+                OneGameUIController.Instance.Clearall();
+            }
             yield return null;
         }
         // 여기로 온다는 건... 연행된 채로 경찰차까지 왔다는 거
         if (body.CompareTag("NPC")) { StartCoroutine(ArrestNPC()); }
-        else { Debug.Log("게임 오버"); } // 게임오버 처리
+        else { StartCoroutine(ArrestPlayer()); }
     }
     void dropBody(GameObject body)
     {
@@ -441,6 +446,7 @@ public class PoliceController : MonoBehaviour
     IEnumerator ArrestNPC()
     {
         suspectBody.GetComponent<NPCController>().fDead();
+        OneGameManager.Instance.addScore(60);
         while (true)
         {
             if (suspectBody.GetComponent<NPCController>().fGetDead())
@@ -451,6 +457,12 @@ public class PoliceController : MonoBehaviour
             }
             yield return null;
         }
+        Destroy(this.gameObject);
+    }
+    IEnumerator ArrestPlayer()
+    {
+        OneGameManager.Instance.GameOver();
+        yield return null;
         Destroy(this.gameObject);
     }
 

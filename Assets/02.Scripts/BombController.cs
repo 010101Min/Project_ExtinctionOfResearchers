@@ -134,7 +134,7 @@ public class BombController : MonoBehaviour
             float distToTarget = Vector3.Distance(transform.position, target.transform.position);
             if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, wallLayer))   // 타겟과의 거리 사이에 벽 없음 (폭발 영향 확인)
             {
-                if (target.CompareTag("NPC")) { target.GetComponent<NPCController>().fDead(); }
+                if (target.CompareTag("NPC")) { target.GetComponent<NPCController>().fDead(); OneGameManager.Instance.addScore(50); }
                 if (target.CompareTag("Police")) { target.GetComponent<PoliceController>().fDead();}
             }
         }
