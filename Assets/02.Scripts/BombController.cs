@@ -122,7 +122,7 @@ public class BombController : MonoBehaviour
         float distToPlayer = Vector3.Distance(transform.position, player.transform.position);
         if (!Physics.Raycast(transform.position, dirToPlayer, distToPlayer, wallLayer) && (distToPlayer <= 10f))
         {
-            Debug.Log("플레이어 사망");
+            OneGameManager.Instance.GameOver();
         }
 
         if (targets.Length == 0) { Debug.Log("아무도 없음"); }
@@ -277,18 +277,5 @@ public class BombController : MonoBehaviour
             if (percent >= 1) yield break;
             yield return null;
         }
-    }
-
-
-    // 폭발 범위 함수
-    private void fFireExplosion()
-    {
-        Debug.Log("폭발");
-        
-
-        //Instantiate(ExplosionEffect, this.transform.position, Quaternion.identity);
-
-        
-        AfterExplosion();
     }
 }

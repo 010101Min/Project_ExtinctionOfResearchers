@@ -12,21 +12,23 @@ public class OneGameManager : MonoBehaviour
     private bool isGameOver = false;
     private bool isGamePaused = false;
     private bool isGameClear = false;
+    private bool isGoalAchieved = false;
+
+    public int peopleCount;
+    private int targetCount;
+    private int peopleKillCount = 0;
+    private int targetKillCount = 0;
 
     private int score = 0;
     private float time = 0;
     private int minutes = 0;
     private int seconds = 0;
-    public int timeLimit = 5;
+    public int timeLimit = 1;
 
     private int policeCount = 0;
 
-    public Text timeText;
-    public Text scoreText;
-    public Text resercherText;
-    public Text allText;
-
     public GameObject policePrefab;
+    public GameObject npcPrefab;
     public GameObject engineer;
     public GameObject paramedic;
     public GameObject policeCarPrefab;
@@ -39,6 +41,18 @@ public class OneGameManager : MonoBehaviour
         else if (Instance != this) Destroy(gameObject);
     }
 
+    private void Start()
+    {
+        targetCount = peopleCount / 6;
+        for (int i = 0; i < peopleCount; i++)
+        {
+            GameObject npc = Instantiate(npcPrefab, Vector3.zero, Quaternion.identity, GameObject.Find("NPCS").transform);
+            if (i < targetCount) { npc.GetComponent<NPCController>().RandomResearcher(); }
+        }
+        OneGameUIController.Instance.targetCount(targetCount, 0);
+        OneGameUIController.Instance.peopleCount(peopleCount, 0);
+    }
+
     void Update()
     {
         if (Input.GetKeyUp(KeyCode.Escape)) { GamePaused(); }
@@ -47,11 +61,8 @@ public class OneGameManager : MonoBehaviour
             time += Time.deltaTime;
             minutes = (int)time / 60;
             seconds = (int)time % 60;
-            if (minutes <= timeLimit) { timeText.color = Color.yellow; }
-            else { timeText.color = Color.white; }
-            timeText.text = string.Format("TIME: {0}:{1:00}", (int)time / 60, (int)time % 60);
+            OneGameUIController.Instance.TimeText(minutes, seconds, timeLimit);
         }
-        scoreText.text = "SCORE: " + score.ToString();
     }
 
     public void GameOver()
@@ -83,7 +94,33 @@ public class OneGameManager : MonoBehaviour
         isGamePaused = false;
     }
 
-    public void addScore(int score) { this.score += score; }
+    public void addScore(int addscore)
+    {
+        if (!isGameOver && !isGameClear && !isGamePaused)
+        {
+            score += addscore; Debug.Log("현재 점수: " + score.ToString());
+            OneGameUIController.Instance.ScoreText(score);
+        }
+    }
+
+    public void killPeopleCount()
+    {
+        if (!isGameOver && !isGameClear && !isGamePaused)
+        {
+            peopleKillCount++;
+            OneGameUIController.Instance.peopleCount(peopleCount, peopleKillCount);
+            if (peopleKillCount >= peopleCount) { isGoalAchieved = true; }
+        }
+    }
+    public void killTargetCount()
+    {
+        if (!isGameOver && !isGameClear && !isGamePaused)
+        {
+            targetKillCount++;
+            OneGameUIController.Instance.targetCount(targetCount, targetKillCount);
+            if (targetKillCount >= targetCount) { isGoalAchieved = true; }
+        }
+    }
 
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect)
     {

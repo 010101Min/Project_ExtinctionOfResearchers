@@ -25,6 +25,7 @@ public class NPCController : MonoBehaviour
     public GameObject Icon;
     private GameObject icon = null;
 
+    private bool isTarget = false;
     private bool isPoisoned = false;
     private bool isCarriable = false;
     private bool isDetected = false;
@@ -46,7 +47,7 @@ public class NPCController : MonoBehaviour
     public GameObject player;
     private NavMeshAgent agent;
     private Animator anim;
-    public Transform[] pos = new Transform[2];
+    public GameObject[] pos;
 
     private Coroutine idleCoroutine;
     private Coroutine moveCoroutine;
@@ -56,7 +57,6 @@ public class NPCController : MonoBehaviour
 
     void Start()
     {
-        // 연구원 여부 배정
         // 시비에 넘어갈 확률 배정
         // 랜덤 외모 배정
         agent = GetComponent<NavMeshAgent>();
@@ -70,8 +70,9 @@ public class NPCController : MonoBehaviour
 
         StartCoroutine(cSetIcons());
 
+        pos = GameObject.FindGameObjectsWithTag("NPCPos");
         int movePos = Random.Range(0, pos.Length);
-        gameObject.transform.position = pos[movePos].position;
+        gameObject.transform.position = pos[movePos].transform.position;
     }
 
     void Update()
@@ -107,10 +108,7 @@ public class NPCController : MonoBehaviour
     }
 
     // 연구원 여부 배정
-    public void RandomResearcher()
-    {
-
-    }
+    public void RandomResearcher() { isTarget = true; }
     // 시비에 넘어갈 확률 배정
     private void RandomProvoked()
     {
@@ -185,6 +183,8 @@ public class NPCController : MonoBehaviour
         gameObject.layer = LayerMask.NameToLayer("CORPSE");
         icon.GetComponent<NPCStatusIconController>().showDead();
         // 게임매니저에서 킬 수 올리기 필요
+        OneGameManager.Instance.killPeopleCount();
+        if (isTarget) OneGameManager.Instance.killTargetCount();
         state = State.DIE;
     }
     public bool fGetDead() { return isDead; }
@@ -232,7 +232,7 @@ public class NPCController : MonoBehaviour
     // 시신 은닉시 불러올 함수
     public void fHide()
     {
-        if (!isDead) { fDead(); OneGameManager.Instance.addScore(80); }
+        if (!isDead) { fDead(); OneGameManager.Instance.addScore(40); }
         isHidden = true;
         
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
@@ -240,6 +240,7 @@ public class NPCController : MonoBehaviour
     }
     IEnumerator cHide()
     {
+        fHideIcon();
         float elapsedTime = 0f;
         while (elapsedTime < 60f)
         {
@@ -313,7 +314,7 @@ public class NPCController : MonoBehaviour
         int movePos = Random.Range(0, pos.Length);
         float variX = Random.Range(-8f, 8f);
         float variZ = Random.Range(-8f, 8f);
-        Vector3 dest = new Vector3(pos[movePos].position.x + variX, 0f, pos[movePos].position.z + variZ);
+        Vector3 dest = new Vector3(pos[movePos].transform.position.x + variX, 0f, pos[movePos].transform.position.z + variZ);
 
         while ((transform.position - dest).magnitude >= 0.1f)
         {

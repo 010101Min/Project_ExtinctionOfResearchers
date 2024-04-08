@@ -44,10 +44,6 @@ public class ParamedicController : MonoBehaviour
         float minDist = float.MaxValue;
         foreach (GameObject corpse in corpses)
         {
-            //if (corpses.Count == 0) break;
-            //if (corpse == null) { corpses.Remove(corpse); break; }
-            //if (corpse.CompareTag("NPC") && corpse.GetComponent<NPCController>().fGetHidden()) { corpses.Remove(corpse); break; }
-            //else if (corpse.CompareTag("Police") && corpse.GetComponent<PoliceController>().fGetHidden()) { corpses.Remove(corpse); break; }
             float distance = Vector3.Distance(this.transform.position, corpse.transform.position);
             if (distance <= minDist) { minCorpse = corpse; }
         }
@@ -78,7 +74,7 @@ public class ParamedicController : MonoBehaviour
         }
         if (corpse.CompareTag("NPC")) { corpse.GetComponent<NPCController>().fResolved(); }
         else if (corpse.CompareTag("Police")) { corpse.GetComponent<PoliceController>().fResolved(); }
-        removeItems(corpse);
+        Corpses.Remove(corpse);
         if (Corpses.Count > 0) { StartCoroutine(cCome()); }
         else { StartCoroutine(cReturn()); }
     }
@@ -99,13 +95,5 @@ public class ParamedicController : MonoBehaviour
     void fWait()
     {
         StopAllCoroutines();
-    }
-
-    void removeItems(GameObject item)
-    {
-        for (int i = Corpses.Count - 1; i >= 0; i--)
-        {
-            if (Corpses[i] == item) { Corpses.RemoveAt(i); }
-        }
     }
 }

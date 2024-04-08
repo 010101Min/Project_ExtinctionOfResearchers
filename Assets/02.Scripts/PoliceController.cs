@@ -209,7 +209,7 @@ public class PoliceController : MonoBehaviour
     {
         if (corpse != null)
         {
-            if (corpse.CompareTag("NPC")) { if (!corpse.GetComponent<NPCController>().fGetHidden()) { corpse.GetComponent<NPCController>().fDetected(); Corpse.Add(corpse); } }
+            if (corpse.CompareTag("NPC")) { if (!corpse.GetComponent<NPCController>().fGetHidden() && !Corpse.Contains(corpse)) { corpse.GetComponent<NPCController>().fDetected(); Corpse.Add(corpse); } }
             if (corpse.CompareTag("Police")) { if (!corpse.GetComponent<PoliceController>().fGetHidden()) { corpse.GetComponent<PoliceController>().fDetected(); Corpse.Add(corpse); } }
         }
         chaseTime = time;
@@ -218,11 +218,16 @@ public class PoliceController : MonoBehaviour
             Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse);
             if (oldState != State.CHASE) ChangeState(State.RESOLVE);
         }
+        else if (suspect.CompareTag("NPC") && suspect.GetComponent<NPCController>().fGetDead())
+        {
+            Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse);
+            if (oldState != State.CHASE) ChangeState(State.RESOLVE);
+        }
         else
         {
             if (corpse != null) { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : " + corpse.name); }
             else { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : 사라짐"); }
-            if (Suspect != suspect && isCarrying) { dropBody(suspectBody); }
+            if ((suspect != suspectBody) && isCarrying) { dropBody(suspectBody); }
             StopCoroutine(cChase());
             Suspect = suspect;
             ChangeState(State.CHASE);
@@ -316,7 +321,15 @@ public class PoliceController : MonoBehaviour
 
         while ((elapsedTime < chaseTime) && (Suspect != null))
         {
-            if (Suspect.CompareTag("NPC")) { if (Suspect.GetComponent<NPCController>().fGetDead()) break; }
+            if (Suspect.CompareTag("NPC"))
+            {
+                if (Suspect.GetComponent<NPCController>().fGetDead())
+                {
+                    Destroy(handCuff);
+                    handCuff = null;
+                    break;
+                }
+            }
             agent.SetDestination(Suspect.transform.position);
             if ((transform.position - Suspect.transform.position).magnitude <= 2.5f)
             {
@@ -413,7 +426,7 @@ public class PoliceController : MonoBehaviour
         suspectBody = body;
         while (true)
         {
-            if (isArrived) { break; }
+            if (isArrived || state == State.WAIT) { break; }
             if (!isCarrying) { yield break; }
             if (isDead)
             {
@@ -446,7 +459,7 @@ public class PoliceController : MonoBehaviour
     IEnumerator ArrestNPC()
     {
         suspectBody.GetComponent<NPCController>().fDead();
-        OneGameManager.Instance.addScore(60);
+        OneGameManager.Instance.addScore(100);
         while (true)
         {
             if (suspectBody.GetComponent<NPCController>().fGetDead())

@@ -143,8 +143,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   Corpse: {fileID: 0}
-  aliveStatePrefab: {fileID: 533936645943300388, guid: 4d3f20be27a465e459e8a2376e249f7b, type: 3}
-  deadStatePrefab: {fileID: 2303710154359130432, guid: 440ecd076fccba34c9592b66eea8929c, type: 3}
+  Icon: {fileID: 750950610960893292, guid: 7dd1ae4b820d54744a3e2ffcca7701ea, type: 3}
   player: {fileID: 0}
   pos:
   - {fileID: 0}

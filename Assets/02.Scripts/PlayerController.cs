@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 8f;
-    public float turnSpeed = 120f;
+    
     public Transform carryPos;
     public Image HandCuff;
     public Image Stamina_Box;
@@ -66,7 +66,6 @@ public class PlayerController : MonoBehaviour
     {
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
-        float r = Input.GetAxis("Mouse X");
 
         if (Input.GetKey(KeyCode.LeftShift) && !(x == 0 && z == 0) && !isRunning && (Stamina_Bar.fillAmount >= 0.2f))
         {
@@ -76,7 +75,6 @@ public class PlayerController : MonoBehaviour
 
         Vector3 moveDirection = new Vector3(x, 0f, z);
         tr.Translate(moveDirection * moveSpeed * Time.deltaTime);
-        tr.Rotate(Vector3.up * turnSpeed * Time.deltaTime * r);
 
         findObject(out nearestNPC, out nearestBomb, out nearestWindow, out nearestShortcut, out nearestCarriable);
 

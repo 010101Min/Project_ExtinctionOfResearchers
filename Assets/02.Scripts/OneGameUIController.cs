@@ -2,11 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 public class OneGameUIController : MonoBehaviour
 {
     public static OneGameUIController Instance;
+
+    public Text timeText;
+    public Text scoreText;
+    public Text researcherText;
+    public Text allText;
 
     public Text AttackText;
     public Text ProvokeText;
@@ -30,8 +37,30 @@ public class OneGameUIController : MonoBehaviour
 
     private void Start()
     {
+        timeText.color = Color.yellow;
         Clearall();
         ContinueGame();
+    }
+
+    // 좌상단 Text 함수들
+    public void TimeText(int minutes, int seconds, int timeLimit)
+    {
+        timeText.text = string.Format("TIME: {0}:{1:00}", minutes, seconds);
+        if (minutes >= timeLimit) { timeText.color = Color.white; }
+    }
+    public void ScoreText(int score)
+    {
+        scoreText.text = "SCORE: " + score.ToString();
+    }
+    public void targetCount(int target, int killtarget)
+    {
+        researcherText.text = "KILL TARGET: " + killtarget.ToString() + " / " + target.ToString();
+        if (target == killtarget) { researcherText.color = Color.yellow; }
+    }
+    public void peopleCount(int all, int killall)
+    {
+        allText.text = "KILL ALL: " + killall.ToString() + " / " + all.ToString();
+        if (all == killall) { allText.color = Color.yellow; }
     }
 
     // 각종 버튼 함수들
@@ -57,6 +86,7 @@ public class OneGameUIController : MonoBehaviour
         Text scoreText = GameClearPanel.transform.Find("ScoreText").gameObject.GetComponent<Text>();
         scoreText.text = "SCORE: " + score.ToString();
     }
+
 
     public void InAttack() { AttackText.gameObject.SetActive(true); }
     public void InProvoke() { ProvokeText.gameObject.SetActive(true); }
