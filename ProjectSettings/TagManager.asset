@@ -15,6 +15,7 @@ TagManager:
   - Uninteractable
   - ShortCut
   - NPCPos
+  - Teleport
   layers:
   - Default
   - TransparentFX

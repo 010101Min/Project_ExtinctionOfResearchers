@@ -80,11 +80,12 @@ public class OneGameUIController : MonoBehaviour
     }
 
     // GameClearPanel ÇÔ¼ö
-    public void showGameClearPanel(int score)
+    public void showGameClearPanel(int score, int bonus)
     {
         GameClearPanel.gameObject.SetActive(true);
         Text scoreText = GameClearPanel.transform.Find("ScoreText").gameObject.GetComponent<Text>();
-        scoreText.text = "SCORE: " + score.ToString();
+        if (bonus == 0) { scoreText.text = "SCORE: " + score.ToString(); }
+        else { scoreText.text = $"SCORE: {score} + {bonus} = {score + bonus}"; }
     }
 
 

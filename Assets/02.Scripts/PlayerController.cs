@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +16,8 @@ public class PlayerController : MonoBehaviour
     private Coroutine refillStaminaCoroutine;
     private bool isChased = false;
     private bool isCarrying;
-    public bool isRunning;
+    private bool isRunning;
+    private bool isGoalAchieved = false;
     private GameObject carryingBody = null;
 
     GameObject nearestNPC = null;
@@ -23,6 +25,7 @@ public class PlayerController : MonoBehaviour
     GameObject nearestWindow = null;
     GameObject nearestShortcut = null;
     GameObject nearestCarriable = null;
+    GameObject teleport = null;
     Transform tr;
 
     int visiblenpcLayer;
@@ -35,6 +38,7 @@ public class PlayerController : MonoBehaviour
     int invisiblecorpseLayer;
     int corpseLayer;
     int uninteractableLayer;
+    int wallLayer;
 
     void Start()
     {
@@ -53,6 +57,7 @@ public class PlayerController : MonoBehaviour
         shortcutLayer = 1 << LayerMask.NameToLayer("SHORTCUT");
         
         uninteractableLayer = 1 << LayerMask.NameToLayer("UNINTERACTABLE");
+        wallLayer = 1 << LayerMask.NameToLayer("WALL");
 
         isCarrying = false;
 
@@ -60,6 +65,8 @@ public class PlayerController : MonoBehaviour
         Stamina_Bar.fillAmount = 1f;
         Stamina_Box.enabled = false;
         Stamina_Bar.enabled = false;
+
+        teleport = GameObject.FindGameObjectWithTag("Teleport");
     }
 
     void Update()
@@ -143,6 +150,16 @@ public class PlayerController : MonoBehaviour
             {
                 OneGameUIController.Instance.InAbandon();
                 if (Input.GetKeyUp(KeyCode.Space)) { hideBody(carryingBody); }
+            }
+        }
+
+        if (isGoalAchieved)
+        {
+            Vector3 dir = (teleport.transform.position - transform.position).normalized;
+            float distToTarget = Vector3.Distance(transform.position, teleport.transform.position);
+            if ((distToTarget <= 3) && (!Physics.Raycast(transform.position, dir, distToTarget, wallLayer)))
+            {
+                if (Input.GetKeyUp(KeyCode.Space)) { OneGameManager.Instance.GameClear(); }
             }
         }
     }
@@ -355,4 +372,6 @@ public class PlayerController : MonoBehaviour
         HandCuff.enabled = false;
     }
     public bool getChased() { return isChased; }
+
+    public void goalAchieved() { isGoalAchieved = true; }
 }

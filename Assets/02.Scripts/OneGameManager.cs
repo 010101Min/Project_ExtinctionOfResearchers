@@ -12,7 +12,6 @@ public class OneGameManager : MonoBehaviour
     private bool isGameOver = false;
     private bool isGamePaused = false;
     private bool isGameClear = false;
-    private bool isGoalAchieved = false;
 
     public int peopleCount;
     private int targetCount;
@@ -27,11 +26,14 @@ public class OneGameManager : MonoBehaviour
 
     private int policeCount = 0;
 
+    private GameObject player;
     public GameObject policePrefab;
     public GameObject npcPrefab;
     public GameObject engineer;
     public GameObject paramedic;
+    public GameObject teleport;
     public GameObject policeCarPrefab;
+    public GameObject CameraPos;
 
     public List<GameObject> Corpses = new List<GameObject>();
 
@@ -43,6 +45,8 @@ public class OneGameManager : MonoBehaviour
 
     private void Start()
     {
+        player = GameObject.Find("Player");
+
         targetCount = peopleCount / 6;
         for (int i = 0; i < peopleCount; i++)
         {
@@ -67,26 +71,43 @@ public class OneGameManager : MonoBehaviour
 
     public void GameOver()
     {
-        isGameOver = true;
-        OneGameUIController.Instance.showGameOverPanel(score);
+        if (!isGameOver && !isGameClear && !isGamePaused)
+        {
+            Camera.main.gameObject.transform.SetParent(CameraPos.transform);
+            Camera.main.gameObject.transform.position = Vector3.zero + 5 * Vector3.up;
+            CameraPos.GetComponent<CameraController>().fCameraRotate();
+            isGameOver = true;
+            OneGameUIController.Instance.showGameOverPanel(score);
+        }
+        else { Destroy(player.gameObject); }
     }
 
     public void GameClear()
     {
-        isGameClear = true;
-        if (minutes <= timeLimit)
+        if (!isGameOver && !isGameClear && !isGamePaused)
         {
-            score += ((timeLimit - minutes - 1) * 600);
-            score += (60 - seconds) * 10;
+            Camera.main.gameObject.transform.SetParent(CameraPos.transform);
+            Camera.main.gameObject.transform.position = Vector3.zero + 3 * Vector3.up;
+            CameraPos.GetComponent<CameraController>().fCameraRotate();
+            isGameClear = true;
+            int timeBonus = 0;
+            if (minutes < timeLimit)
+            {
+                timeBonus += ((timeLimit - minutes - 1) * 600);
+                timeBonus += (60 - seconds) * 10;
+            }
+            OneGameUIController.Instance.showGameClearPanel(score, timeBonus);
         }
-        OneGameUIController.Instance.showGameClearPanel(score);
     }
 
     public void GamePaused()
     {
-        Time.timeScale = 0f;
-        isGamePaused = true;
-        OneGameUIController.Instance.showOptionPanel();
+        if (!isGameOver && !isGameClear && !isGamePaused)
+        {
+            isGamePaused = true;
+            Time.timeScale = 0f;
+            OneGameUIController.Instance.showOptionPanel();
+        }
     }
     public void GameContinued()
     {
@@ -109,7 +130,6 @@ public class OneGameManager : MonoBehaviour
         {
             peopleKillCount++;
             OneGameUIController.Instance.peopleCount(peopleCount, peopleKillCount);
-            if (peopleKillCount >= peopleCount) { isGoalAchieved = true; }
         }
     }
     public void killTargetCount()
@@ -118,7 +138,7 @@ public class OneGameManager : MonoBehaviour
         {
             targetKillCount++;
             OneGameUIController.Instance.targetCount(targetCount, targetKillCount);
-            if (targetKillCount >= targetCount) { isGoalAchieved = true; }
+            if (targetKillCount >= targetCount) { player.GetComponent<PlayerController>().goalAchieved(); }
         }
     }
 

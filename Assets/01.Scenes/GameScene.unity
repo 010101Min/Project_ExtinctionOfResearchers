@@ -2290,7 +2290,7 @@ GameObject:
   - component: {fileID: 876890889}
   m_Layer: 11
   m_Name: Teleport
-  m_TagString: Uninteractable
+  m_TagString: Teleport
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2729,6 +2729,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1254337764}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &921956728
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 921956729}
+  - component: {fileID: 921956730}
+  m_Layer: 0
+  m_Name: CameraPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &921956729
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921956728}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &921956730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921956728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef34b7b6a36748641b3a78735c64641e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotateSpeed: 10
 --- !u!1 &956783066
 GameObject:
   m_ObjectHideFlags: 0
@@ -4087,7 +4132,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Score: '
+  m_Text: 'Score: 0'
 --- !u!222 &1208829383
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4910,13 +4955,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b48c2debb0216564fbedc7e86b87062c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  peopleCount: 12
-  timeLimit: 5
+  peopleCount: 6
+  timeLimit: 1
   policePrefab: {fileID: 658823264917967712, guid: 6e919e330fe0ee143a9cb1ea43169a9f, type: 3}
   npcPrefab: {fileID: 8970395315457750392, guid: 52f61be0799a0b5468ff39fb94fc4cda, type: 3}
   engineer: {fileID: 1547375691}
   paramedic: {fileID: 890924902}
+  teleport: {fileID: 876890888}
   policeCarPrefab: {fileID: 2573812687666044992, guid: 5074cff6e8c50574cb7768427a9d3576, type: 3}
+  CameraPos: {fileID: 921956728}
   Corpses: []
 --- !u!1 &1475870605
 GameObject:
@@ -5023,7 +5070,6 @@ MonoBehaviour:
   HandCuff: {fileID: 1577025119}
   Stamina_Box: {fileID: 976899291}
   Stamina_Bar: {fileID: 1269236809}
-  isRunning: 0
 --- !u!136 &1475870611
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -7389,3 +7435,4 @@ SceneRoots:
   - {fileID: 1525858980}
   - {fileID: 1278215207}
   - {fileID: 876890892}
+  - {fileID: 921956729}
