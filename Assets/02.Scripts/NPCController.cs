@@ -14,7 +14,8 @@ public class NPCController : MonoBehaviour
         PROVOKED,
         SLEEP,
         DIE,
-        HIDE
+        HIDE,
+        ARRESTED
     }
 
     public State state = State.MOVE;
@@ -28,7 +29,6 @@ public class NPCController : MonoBehaviour
     private bool isCarriable = false;
     private bool isDetected = false;
     private bool isDead = false;
-    private bool isArrested = false;
     private bool isHidden = false;
     private bool provokable = true;
     private bool witnessable = true;
@@ -36,6 +36,7 @@ public class NPCController : MonoBehaviour
     private float fStateTime = 0f;
     private float fPoisoned = 0f;
     private int fProvoke = 0;
+    private int tempfProvoke = 0;
     private float DeathTimer = 0f;
 
     int npcLayer;
@@ -247,6 +248,7 @@ public class NPCController : MonoBehaviour
     }
     public bool fGetCarriable() { return isCarriable; }
     public bool fGetHidden() { return isHidden; }
+    public void fHideIcon() { Destroy(icon.gameObject); }
 
     // 시신 수습시 불러올 함수
     public void fResolved()
@@ -257,14 +259,21 @@ public class NPCController : MonoBehaviour
     }
 
     // 구속시 불러올 함수
-    public void fArrested()
+    public void fGetArrested()
     {
         initCoroutine();
+        state = State.ARRESTED;
         agent.enabled = false;
         witnessable = false;
+        tempfProvoke = fProvoke;
         fProvoke = 0;
+    }
+    public void fOutArrested()
+    {
+        witnessable = true;
+        fProvoke = tempfProvoke;
         isCarriable = false;
-        isArrested = true;
+        state = State.MOVE;
     }
 
     // 코루틴 초기화 함수
@@ -321,7 +330,7 @@ public class NPCController : MonoBehaviour
         icon.GetComponent<NPCStatusIconController>().showSleeping();
 
         agent.enabled = false;
-        int tempfProvoke = fProvoke;
+        tempfProvoke = fProvoke;
         witnessable = false;
         fProvoke = 0;
         isCarriable = true;
@@ -517,11 +526,5 @@ public class NPCController : MonoBehaviour
         agent.speed = 3.5f;
         provokedCoroutine = null;
         state = State.MOVE;
-    }
-
-    // 구속시 경찰차에 닿으면
-    private void OnCollisionEnter(Collision other)
-    {
-        if (other.gameObject.CompareTag("PoliceCar") && isArrested) { fHide(); }
     }
 }

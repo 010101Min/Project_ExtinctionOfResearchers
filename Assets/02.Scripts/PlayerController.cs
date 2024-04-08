@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 10f;
+    public float moveSpeed = 8f;
     public float turnSpeed = 120f;
     public Transform carryPos;
     public Image HandCuff;
@@ -83,7 +83,6 @@ public class PlayerController : MonoBehaviour
         OneGameUIController.Instance.Clearall();
         if (nearestNPC != null)
         {
-            Debug.Log("공격 가능 대상 있음");
             OneGameUIController.Instance.InAttack();
             if (Input.GetKeyDown(KeyCode.E)) { killNpc(nearestNPC); }
             if (nearestNPC.GetComponent<NPCController>().fGetProvoked())

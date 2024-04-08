@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Rendering;
@@ -22,11 +21,13 @@ public class PoliceController : MonoBehaviour
 
     private State oldState;
     public State state;
+    public Transform carryPos;
     NavMeshAgent agent;
     private GameObject Suspect;
     public List<GameObject> Corpse = new List<GameObject>();
     private GameObject policeCar;
     private GameObject player;
+    private GameObject suspectBody = null;
     public GameObject handCuffPrefab;
     private GameObject handCuff = null;
 
@@ -35,9 +36,11 @@ public class PoliceController : MonoBehaviour
 
     private int chaseTime = 0;
     private bool isDead = false;
-    public bool isDetected = false;
+    private bool isDetected = false;
     private bool isCarriable = false;
     private bool isHidden = false;
+    private bool isCarrying = false;
+    private bool isArrived = false;
 
     int npcLayer;
     int corpseLayer;
@@ -219,6 +222,7 @@ public class PoliceController : MonoBehaviour
         {
             if (corpse != null) { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : " + corpse.name); }
             else { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : 사라짐"); }
+            if (Suspect != suspect && isCarrying) { dropBody(suspectBody); }
             StopCoroutine(cChase());
             Suspect = suspect;
             ChangeState(State.CHASE);
@@ -316,16 +320,14 @@ public class PoliceController : MonoBehaviour
             agent.SetDestination(Suspect.transform.position);
             if ((transform.position - Suspect.transform.position).magnitude <= 2.5f)
             {
+                // 만약 용의자가 잡혔으면
                 if (Suspect.CompareTag("NPC"))
                 {
-                    Suspect.GetComponent<NPCController>().fArrested();
+                    Suspect.GetComponent<NPCController>().fGetArrested();
                     Destroy(handCuff);
                     handCuff = null;
                 }
-                else
-                {
-                    // 플레이어가 잡혔을 때 함수 구현 필요
-                }
+                StartCoroutine(cCarryBody(Suspect));
                 break;
             }
             elapsedTime += Time.deltaTime;
@@ -391,7 +393,7 @@ public class PoliceController : MonoBehaviour
         OneGameManager.Instance.plusCorpse(Corpse);
         cWait();
     }
-    // Wait 상태 구현 (임시)
+    // Wait 상태 구현
     void cWait()
     {
         initCoroutine();
@@ -399,6 +401,56 @@ public class PoliceController : MonoBehaviour
         chaseCoroutine = false;
         resolveCoroutine = false;
         returnCoroutine = false;
+        isArrived = true;
+        if (!isCarrying && suspectBody == null) { Destroy(this.gameObject); }
+    }
+
+    // 캐릭터 업고 있는 것 표현
+    IEnumerator cCarryBody(GameObject body)
+    {
+        agent.speed = 4f;
+        isCarrying = true;
+        suspectBody = body;
+        while (true)
+        {
+            if (isArrived) { break; }
+            if (!isCarrying) { yield break; }
+            if (isDead)
+            {
+                // 끌고 가던 도중 경찰'만' 죽었다면
+                dropBody(body);
+                yield break;
+            }
+            if (body.CompareTag("NPC")) { body.transform.position = carryPos.position; }
+            else { body.transform.position = carryPos.position; }
+            yield return null;
+        }
+        // 여기로 온다는 건... 연행된 채로 경찰차까지 왔다는 거
+        if (body.CompareTag("NPC")) { StartCoroutine(ArrestNPC()); }
+        else { Debug.Log("게임 오버"); } // 게임오버 처리
+    }
+    void dropBody(GameObject body)
+    {
+        body.transform.position = new Vector3(body.transform.position.x, 0f, body.transform.position.z);
+        isCarrying = false;
+        suspectBody = null;
+
+        if (body.CompareTag("NPC")) { body.gameObject.GetComponent<NPCController>().fOutArrested(); }
+        else { body.GetComponent<PlayerController>().enabled = true; }
+    }
+    IEnumerator ArrestNPC()
+    {
+        suspectBody.GetComponent<NPCController>().fDead();
+        while (true)
+        {
+            if (suspectBody.GetComponent<NPCController>().fGetDead())
+            {
+                suspectBody.GetComponent<NPCController>().fHideIcon();
+                Destroy(suspectBody.gameObject);
+                break;
+            }
+            yield return null;
+        }
         Destroy(this.gameObject);
     }
 

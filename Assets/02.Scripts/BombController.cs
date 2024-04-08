@@ -53,13 +53,11 @@ public class BombController : MonoBehaviour
             else if (state == State.FIREEXTINGUISHER)
             {
                 AfterUse();
-                Debug.Log("소화기 작동");
                 StartCoroutine(cFireUse());
             }
             else
             {
                 AfterUse();
-                Debug.Log("독 작동");
                 StartCoroutine(cPoisonUse());
             }
         }
@@ -84,7 +82,6 @@ public class BombController : MonoBehaviour
     IEnumerator cBombUse()
     {
         float timer = 0f;
-        Debug.Log("함정 작동");
         Image bombIcon = Instantiate(defaultBombIcon, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
         bombIcon.fillAmount = 1f;
         while (bombIcon.fillAmount > 0)
@@ -113,7 +110,6 @@ public class BombController : MonoBehaviour
     // 폭발 범위 함수
     private void fBombExplosion()
     {
-        Debug.Log("폭발");
         int npcLayer = 1 << LayerMask.NameToLayer("NPC");
         int policeLayer = 1 << LayerMask.NameToLayer("POLICE");
         int wallLayer = 1 << LayerMask.NameToLayer("WALL");
