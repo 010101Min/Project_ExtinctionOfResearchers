@@ -213,8 +213,8 @@ public class PoliceController : MonoBehaviour
     {
         if (corpse != null)
         {
-            if (corpse.CompareTag("NPC")) { if (!corpse.GetComponent<NPCController>().fGetHidden() && !Corpse.Contains(corpse)) { corpse.GetComponent<NPCController>().fDetected(); Corpse.Add(corpse); } }
-            if (corpse.CompareTag("Police")) { if (!corpse.GetComponent<PoliceController>().fGetHidden()) { corpse.GetComponent<PoliceController>().fDetected(); Corpse.Add(corpse); } }
+            if (corpse.CompareTag("NPC")) { if (!corpse.GetComponent<NPCController>().fGetHidden() && !Corpse.Contains(corpse)) { Corpse.Add(corpse); } }
+            if (corpse.CompareTag("Police")) { if (!corpse.GetComponent<PoliceController>().fGetHidden() && !Corpse.Contains(corpse)) { Corpse.Add(corpse); } }
         }
         chaseTime = time;
         if (suspect == reporter)

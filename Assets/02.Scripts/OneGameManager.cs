@@ -24,7 +24,7 @@ public class OneGameManager : MonoBehaviour
     private int seconds = 0;
     public int timeLimit = 1;
 
-    private int policeCount = 0;
+    public int policeCount = 0;
 
     private GameObject player;
     public GameObject policePrefab;
@@ -209,7 +209,7 @@ public class OneGameManager : MonoBehaviour
     public void plusCorpse(List<GameObject> corpses)
     {
         foreach(GameObject corpse in corpses) { Corpses.Add(corpse); }
-        if (corpses.Count >= 3) { ParamedicReport(Corpses); Corpses.Clear(); }
+        if (Corpses.Count >= 3) { ParamedicReport(Corpses); Corpses.Clear(); }
     }
 
     public void DestroyShortCut(GameObject shortCut)

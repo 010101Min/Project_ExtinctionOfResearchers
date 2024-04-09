@@ -152,5 +152,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8c16b1907894f8408c45a5c814321c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 20
+  speed: 40
   PolicePrefab: {fileID: 658823264917967712, guid: 6e919e330fe0ee143a9cb1ea43169a9f, type: 3}

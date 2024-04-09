@@ -160,7 +160,7 @@ public class PlayerController : MonoBehaviour
             if ((distToTarget <= 3) && (!Physics.Raycast(transform.position, dir, distToTarget, wallLayer)))
             {
                 OneGameUIController.Instance.InTeleport();
-                if (Input.GetKeyUp(KeyCode.Space)) { OneGameManager.Instance.GameClear(); }
+                if (Input.GetKeyUp(KeyCode.Space)) { OneGameUIController.Instance.Clearall(); OneGameManager.Instance.GameClear(); }
             }
         }
     }
