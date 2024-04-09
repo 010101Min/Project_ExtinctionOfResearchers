@@ -315,6 +315,7 @@ public class PlayerController : MonoBehaviour
         Stamina_Bar.enabled = false;
     }
     void startRun() { isRunning = true; StartCoroutine(cRun()); }
+    public void endRun() { isRunning = false; }
 
     void killNpc(GameObject target)
     {

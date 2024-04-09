@@ -22,10 +22,10 @@ public class PoliceCarController : MonoBehaviour
 
     void Start()
     {
-        tempPos = GameObject.Find("PolicePos");
-        startPos = tempPos.transform.Find("startPos").gameObject;
-        parkPos = tempPos.transform.Find("parkPos").gameObject;
-        endPos = tempPos.transform.Find("endPos").gameObject;
+        tempPos = GameObject.Find("Pos");
+        startPos = tempPos.transform.Find("PolicePos/startPos").gameObject;
+        parkPos = tempPos.transform.Find("PolicePos/parkPos").gameObject;
+        endPos = tempPos.transform.Find("PolicePos/endPos").gameObject;
         this.gameObject.transform.position = startPos.transform.position;
         policePos = this.gameObject.transform.Find("PolicePos").gameObject;
         StartCoroutine(ComeCar());

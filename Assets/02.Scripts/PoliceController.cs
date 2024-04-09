@@ -315,6 +315,7 @@ public class PoliceController : MonoBehaviour
         StopCoroutine(cResolve());
         StopCoroutine(cReturn());
         if (chaseCoroutine) yield break;
+        if (Suspect == null) yield break;
         chaseCoroutine = true;
         resolveCoroutine = false;
         returnCoroutine = false;
@@ -455,6 +456,7 @@ public class PoliceController : MonoBehaviour
             else
             {
                 body.transform.position = carryPos.position;
+                body.GetComponent<PlayerController>().endRun();
                 body.GetComponent<PlayerController>().enabled = false;
                 OneGameUIController.Instance.Clearall();
             }

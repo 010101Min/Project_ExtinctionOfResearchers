@@ -132,7 +132,7 @@ public class OneGameManager : MonoBehaviour
     {
         if (!isGameOver && !isGameClear && !isGamePaused)
         {
-            score += addscore; Debug.Log("현재 점수: " + score.ToString());
+            score += addscore;
             OneGameUIController.Instance.ScoreText(score);
         }
     }
@@ -157,6 +157,11 @@ public class OneGameManager : MonoBehaviour
 
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect)
     {
+        if (corpse != null)
+        {
+            if (corpse.CompareTag("NPC")) { if (!corpse.GetComponent<NPCController>().fGetHidden()) { corpse.GetComponent<NPCController>().fDetected(); } }
+            if (corpse.CompareTag("Police")) { if (!corpse.GetComponent<PoliceController>().fGetHidden()) { corpse.GetComponent<PoliceController>().fDetected(); } }
+        }
         GameObject[] polices = GameObject.FindGameObjectsWithTag("Police");
         GameObject policeCar = GameObject.FindGameObjectWithTag("PoliceCar");
         bool PoliceExist = false;
@@ -178,6 +183,27 @@ public class OneGameManager : MonoBehaviour
             GameObject policecar = Instantiate(policeCarPrefab);
             policecar.GetComponent<PoliceCarController>().GetReport(reporter, corpse, suspect, 15 + (policeCount * 5));
             policeCount++;
+        }
+        else if (!PoliceExist && (policeCar != null && !policeCar.GetComponent<PoliceCarController>().getLeave())) { StartCoroutine(WaitForPolice(reporter, corpse, suspect)); }
+    }
+    IEnumerator WaitForPolice(GameObject tempReporter, GameObject tempCorpse, GameObject tempSuspect)
+    {
+        // 만약 경찰은 없는데 경찰차는 있는 상태라면 경찰 들어올 때까지 대기하다가 넣어주기
+        while (true)
+        {
+            GameObject[] polices = GameObject.FindGameObjectsWithTag("Police");
+            if (polices != null)
+            {
+                foreach (GameObject police in polices)
+                {
+                    if (!police.GetComponent<PoliceController>().getDead())
+                    {
+                        police.GetComponent<PoliceController>().Report(tempReporter, tempCorpse, tempSuspect, 15 + (policeCount * 5));
+                        yield break;
+                    }
+                }
+            }
+            yield return null;
         }
     }
     public void plusCorpse(List<GameObject> corpses)
