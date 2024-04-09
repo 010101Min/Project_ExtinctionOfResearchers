@@ -159,6 +159,7 @@ public class PlayerController : MonoBehaviour
             float distToTarget = Vector3.Distance(transform.position, teleport.transform.position);
             if ((distToTarget <= 3) && (!Physics.Raycast(transform.position, dir, distToTarget, wallLayer)))
             {
+                OneGameUIController.Instance.InTeleport();
                 if (Input.GetKeyUp(KeyCode.Space)) { OneGameManager.Instance.GameClear(); }
             }
         }
@@ -306,6 +307,12 @@ public class PlayerController : MonoBehaviour
         Stamina_Box.enabled = false;
         Stamina_Bar.enabled = false;
         refillStaminaCoroutine = null;
+    }
+    public void fHideIcon()
+    {
+        HandCuff.enabled = false;
+        Stamina_Box.enabled = false;
+        Stamina_Bar.enabled = false;
     }
     void startRun() { isRunning = true; StartCoroutine(cRun()); }
 

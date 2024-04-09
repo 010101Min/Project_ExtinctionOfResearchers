@@ -79,7 +79,6 @@ public class OneGameManager : MonoBehaviour
             isGameOver = true;
             OneGameUIController.Instance.showGameOverPanel(score);
         }
-        else { Destroy(player.gameObject); }
     }
 
     public void GameClear()
@@ -97,6 +96,9 @@ public class OneGameManager : MonoBehaviour
                 timeBonus += (60 - seconds) * 10;
             }
             OneGameUIController.Instance.showGameClearPanel(score, timeBonus);
+
+            player.GetComponent<PlayerController>().fHideIcon();
+            Destroy(player.gameObject);
         }
     }
 

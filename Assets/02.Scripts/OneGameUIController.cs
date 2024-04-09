@@ -24,6 +24,7 @@ public class OneGameUIController : MonoBehaviour
     public Text PoisonText;
     public Text ShortcutText;
     public Text AbandonText;
+    public Text TeleportText;
 
     public GameObject OptionPanel;
     public GameObject GameOverPanel;
@@ -98,6 +99,7 @@ public class OneGameUIController : MonoBehaviour
     public void InPoison() { PoisonText.gameObject.SetActive(true); }
     public void InShortcut() { ShortcutText.gameObject.SetActive(true); }
     public void InAbandon() { AbandonText.gameObject.SetActive(true); }
+    public void InTeleport() { TeleportText.gameObject.SetActive(true); }
 
     public void Clearall()
     {
@@ -110,5 +112,6 @@ public class OneGameUIController : MonoBehaviour
         ShortcutText.gameObject.SetActive(false);
         PoisonText.gameObject.SetActive(false);
         AbandonText.gameObject.SetActive(false);
+        TeleportText.gameObject.SetActive(false);
     }
 }

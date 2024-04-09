@@ -22,6 +22,10 @@ public class NPCController : MonoBehaviour
     private GameObject Suspect = null;
     public GameObject Corpse = null;
 
+    public float moveSpeed;
+    public float runSpeed;
+    public float provokeSpeed;
+
     public GameObject Icon;
     private GameObject icon = null;
 
@@ -311,6 +315,7 @@ public class NPCController : MonoBehaviour
     IEnumerator cMove()
     {
         agent.enabled = true;
+        agent.speed = moveSpeed;
         int movePos = Random.Range(0, pos.Length);
         float variX = Random.Range(-8f, 8f);
         float variZ = Random.Range(-8f, 8f);
@@ -426,7 +431,7 @@ public class NPCController : MonoBehaviour
     private void fGiveUp(bool tempProvokable)
     {
         provokable = tempProvokable;
-        agent.speed = 3.5f;
+        agent.speed = moveSpeed;
         Corpse = null;
         Suspect = null;
         reportCoroutine = null;
@@ -444,6 +449,7 @@ public class NPCController : MonoBehaviour
     }
     IEnumerator cReport(GameObject corpse)
     {
+        if (player == null) yield break;
         bool tempProvokable = provokable;
         provokable = false;
 
@@ -487,7 +493,7 @@ public class NPCController : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         agent.enabled = true;
-        agent.speed = 5.6f;
+        agent.speed = runSpeed;
 
         while (true)
         {// 만약 신고 하러 가는 도중 그 시신이 사라지면(은닉되면) 용의자만 신고
@@ -516,7 +522,7 @@ public class NPCController : MonoBehaviour
     IEnumerator cProvoked()
     {
         agent.enabled = true;
-        agent.speed = 2.5f;
+        agent.speed = provokeSpeed;
         float elapsedTime = 0f;
 
         while (elapsedTime < 15f)
@@ -528,7 +534,7 @@ public class NPCController : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        agent.speed = 3.5f;
+        agent.speed = moveSpeed;
         provokedCoroutine = null;
         state = State.MOVE;
     }

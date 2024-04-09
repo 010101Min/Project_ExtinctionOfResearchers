@@ -264,6 +264,7 @@ public class PoliceController : MonoBehaviour
     IEnumerator FindSuspect(GameObject corpse)
     {
         Debug.Log("용의자 찾기 시작");
+        if (player == null) yield break;
         GameObject tempSuspect = this.gameObject;
         Collider[] suspects = Physics.OverlapSphere(corpse.transform.position, 8f, npcLayer);
 
@@ -321,6 +322,7 @@ public class PoliceController : MonoBehaviour
 
         while ((elapsedTime < chaseTime) && (Suspect != null))
         {
+            if (Suspect == null) break;
             if (Suspect.CompareTag("NPC"))
             {
                 if (Suspect.GetComponent<NPCController>().fGetDead())
@@ -346,7 +348,7 @@ public class PoliceController : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        player.GetComponent<PlayerController>().outChased();
+        if (player != null) player.GetComponent<PlayerController>().outChased();
         Suspect = null;
         Debug.Log("추격 종료");
         agent.speed = 6f;
@@ -384,7 +386,7 @@ public class PoliceController : MonoBehaviour
                 yield return null;
             }
         }
-        if (Suspect == player) { player.GetComponent<PlayerController>().outChased(); }
+        if (Suspect == player && player != null) { player.GetComponent<PlayerController>().outChased(); }
         ChangeState(State.RETURN);
     }
     // Return 상태 구현
@@ -434,7 +436,7 @@ public class PoliceController : MonoBehaviour
                 dropBody(body);
                 yield break;
             }
-            if (body.CompareTag("NPC")) { body.transform.position = carryPos.position; }
+            if (body.CompareTag("NPC")) { body.transform.position = carryPos.position; body.layer = LayerMask.NameToLayer("UNINTERACTABLE"); }
             else
             {
                 body.transform.position = carryPos.position;
@@ -453,7 +455,7 @@ public class PoliceController : MonoBehaviour
         isCarrying = false;
         suspectBody = null;
 
-        if (body.CompareTag("NPC")) { body.gameObject.GetComponent<NPCController>().fOutArrested(); }
+        if (body.CompareTag("NPC")) { body.gameObject.GetComponent<NPCController>().fOutArrested(); body.layer = LayerMask.NameToLayer("NPC"); }
         else { body.GetComponent<PlayerController>().enabled = true; }
     }
     IEnumerator ArrestNPC()

@@ -1092,6 +1092,7 @@ MonoBehaviour:
   PoisonText: {fileID: 594079905}
   ShortcutText: {fileID: 1589361685}
   AbandonText: {fileID: 2124210119}
+  TeleportText: {fileID: 1271659459}
   OptionPanel: {fileID: 1659103650}
   GameOverPanel: {fileID: 391005371}
   GameClearPanel: {fileID: 77691614}
