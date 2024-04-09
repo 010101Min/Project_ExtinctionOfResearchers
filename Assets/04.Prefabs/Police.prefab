@@ -104,6 +104,10 @@ MonoBehaviour:
   Corpse: []
   handCuffPrefab: {fileID: 4049378131678176324, guid: c29c37673dfdd57499ba2a7cc859772c, type: 3}
   deadStatePrefab: {fileID: 524511506107860510, guid: 440ecd076fccba34c9592b66eea8929c, type: 3}
+  moveSpeed: 8
+  chaseSpeed: 12
+  returnSpeed: 6
+  carrySpeed: 4
 --- !u!195 &-9202951390946360237
 NavMeshAgent:
   m_ObjectHideFlags: 0

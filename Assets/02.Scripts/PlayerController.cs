@@ -380,5 +380,11 @@ public class PlayerController : MonoBehaviour
     }
     public bool getChased() { return isChased; }
 
+    public void fDead()
+    {
+        fHideIcon();
+        Destroy(this.gameObject);
+    }
+
     public void goalAchieved() { isGoalAchieved = true; }
 }

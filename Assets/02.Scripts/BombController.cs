@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +10,8 @@ public class BombController : MonoBehaviour
     public Image defaultBombIcon;
     public Image poisonBombIcon;
     public Image fireBombIcon;
+    public Image crosshairPrefab;
+    private Image crossIcon;
     private GameObject player;
     float minScale = 0.1f; // 최소 스케일 값
     float maxScale = 0.5f; // 최대 스케일 값
@@ -21,6 +21,7 @@ public class BombController : MonoBehaviour
     private int wallLayer;
 
     private bool isUsable = true;
+    private bool showCross = false;
     float explosionTimer = 10f;
     float blindTimer = 20f;
     float poisonTimer = 20f;
@@ -39,6 +40,8 @@ public class BombController : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player");
         mainCamera = Camera.main;
         wallLayer = 1 << LayerMask.NameToLayer("WALL");
+        crossIcon = Instantiate(crosshairPrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
+        crossIcon.gameObject.SetActive(false);
     }
 
     public void UseBomb()
@@ -103,8 +106,8 @@ public class BombController : MonoBehaviour
 
             yield return null;
         }
-        Destroy(bombIcon.gameObject);
         // 폭발
+        Destroy(bombIcon.gameObject);
         fBombExplosion();
     }
     // 폭발 범위 함수
@@ -123,6 +126,7 @@ public class BombController : MonoBehaviour
         if (!Physics.Raycast(transform.position, dirToPlayer, distToPlayer, wallLayer) && (distToPlayer <= 10f))
         {
             OneGameManager.Instance.GameOver();
+            player.GetComponent<PlayerController>().fDead();
         }
 
         if (targets.Length == 0) { Debug.Log("아무도 없음"); }
@@ -277,5 +281,31 @@ public class BombController : MonoBehaviour
             if (percent >= 1) yield break;
             yield return null;
         }
+    }
+
+    public void showCrossHair() { if (!showCross) { showCross = true; StartCoroutine(cCrossHair()); } }
+    public void hideCrossHair() { showCross = false; }
+    IEnumerator cCrossHair()
+    {
+        crossIcon.gameObject.SetActive(true);
+        while (true)
+        {
+            if (!isUsable) break;
+            if (!showCross) break;
+            crossIcon.transform.position = Camera.main.WorldToScreenPoint(this.gameObject.transform.position);
+
+            float distance = Vector3.Distance(this.gameObject.transform.position, mainCamera.transform.position);
+            RaycastHit hit;
+            // 거리가 100 이상이거나 사이에 벽이 있으면
+            if ((distance > 100f) || (Physics.Raycast(mainCamera.transform.position, (this.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer))) { crossIcon.gameObject.SetActive(false); }
+            else
+            {
+                crossIcon.gameObject.SetActive(true);
+                float scaleRatio = Mathf.Clamp(1 - (distance / maxDistance), minScale, maxScale);
+                crossIcon.gameObject.transform.localScale = new Vector3(scaleRatio, scaleRatio, scaleRatio);
+            }
+            yield return null;
+        }
+        crossIcon.gameObject.SetActive(false);
     }
 }

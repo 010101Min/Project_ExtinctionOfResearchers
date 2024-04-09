@@ -449,19 +449,24 @@ public class NPCController : MonoBehaviour
     }
     IEnumerator cReport(GameObject corpse)
     {
-        if (player == null) yield break;
         bool tempProvokable = provokable;
         provokable = false;
 
         GameObject dest = null;
         bool isPoliceExist = false;
 
+        float distToPlayer = float.MaxValue;
+        bool isPlayerInSight = false;
+
         // 의심할 캐릭터 결정
         // 만약 의심할 캐릭터가 없다면 자기 자신을 의심 (경찰 신고 시 신고자와 용의자 모두 받도록...)
         Collider[] colls = Physics.OverlapSphere(corpse.transform.position, 5f, npcLayer);
 
-        float distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
-        bool isPlayerInSight = !(Physics.Raycast(transform.position, (player.transform.position - this.transform.position).normalized, Vector3.Distance(this.transform.position, player.transform.position), wallLayer));
+        if (player != null)
+        {
+            distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
+            isPlayerInSight = !(Physics.Raycast(transform.position, (player.transform.position - this.transform.position).normalized, Vector3.Distance(this.transform.position, player.transform.position), wallLayer));
+        }
         float distToTarget = 5f;
 
         if (colls.Length <= 0)

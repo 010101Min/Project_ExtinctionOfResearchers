@@ -143,9 +143,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   Corpse: {fileID: 0}
-  moveSpeed: 6
+  moveSpeed: 5
   runSpeed: 9
-  provokeSpeed: 5
+  provokeSpeed: 4
   Icon: {fileID: 750950610960893292, guid: 7dd1ae4b820d54744a3e2ffcca7701ea, type: 3}
   player: {fileID: 0}
   pos:

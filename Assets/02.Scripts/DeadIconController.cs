@@ -37,10 +37,13 @@ public class DeadIconController : MonoBehaviour
 
             if (distance > 100f) { DeadStatus.SetActive(false); return; }
 
+            Vector3 viewportPos = mainCamera.WorldToViewportPoint(npc.transform.position);
+            bool isInView = viewportPos.z > 0 && viewportPos.x > 0 && viewportPos.x < 1 && viewportPos.y > 0 && viewportPos.y < 1;
+
             // 카메라와 UI 사이에 벽이 있는지 확인
             RaycastHit hit;
-            if (Physics.Raycast(mainCamera.transform.position, (npc.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer)) { DeadStatus.SetActive(false); }
-            else { DeadStatus.SetActive(true); }
+            if ((!Physics.Raycast(mainCamera.transform.position, (npc.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer)) && isInView) { DeadStatus.SetActive(true); }
+            else { DeadStatus.SetActive(false); }
         }
     }
 

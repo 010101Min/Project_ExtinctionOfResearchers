@@ -33,10 +33,13 @@ public class HandCuffIconController : MonoBehaviour
 
             if (distance > 100f) { handcuff.SetActive(false); return; }
 
+            Vector3 viewportPos = mainCamera.WorldToViewportPoint(chased.gameObject.transform.position);
+            bool isInView = viewportPos.z > 0 && viewportPos.x > 0 && viewportPos.x < 1 && viewportPos.y > 0 && viewportPos.y < 1;
+
             // 카메라와 UI 사이에 벽이 있는지 확인
             RaycastHit hit;
-            if (Physics.Raycast(mainCamera.transform.position, (chased.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer)) { handcuff.SetActive(false); }
-            else { handcuff.SetActive(true); }
+            if ((!Physics.Raycast(mainCamera.transform.position, (chased.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer)) && isInView) { handcuff.SetActive(true); }
+            else { handcuff.SetActive(false); }
         }
     }
 

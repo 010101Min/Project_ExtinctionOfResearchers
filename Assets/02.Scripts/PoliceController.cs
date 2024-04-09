@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Rendering;
-using UnityEngine.UI;
 
 public class PoliceController : MonoBehaviour
 {
@@ -34,6 +32,11 @@ public class PoliceController : MonoBehaviour
     public GameObject deadStatePrefab;
     private GameObject deadState;
 
+    public float moveSpeed;
+    public float chaseSpeed;
+    public float returnSpeed;
+    public float carrySpeed;
+
     private int chaseTime = 0;
     private bool isDead = false;
     private bool isDetected = false;
@@ -53,7 +56,7 @@ public class PoliceController : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        agent.speed = 6f;
+        agent.speed = moveSpeed;
         policeCar = GameObject.FindGameObjectWithTag("PoliceCar");
         player = GameObject.FindGameObjectWithTag("Player");
 
@@ -159,6 +162,7 @@ public class PoliceController : MonoBehaviour
         deadState.GetComponent<DeadIconController>().showDead();
         gameObject.layer = LayerMask.NameToLayer("CORPSE");
         state = State.DIE;
+        policeCar.GetComponent<PoliceCarController>().leaveSign();
     }
     public bool getDead() { return isDead; }
     // 시신 발견시 불러올 함수
@@ -268,8 +272,14 @@ public class PoliceController : MonoBehaviour
         GameObject tempSuspect = this.gameObject;
         Collider[] suspects = Physics.OverlapSphere(corpse.transform.position, 8f, npcLayer);
 
-        float distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
-        bool isPlayerInSight = !(Physics.Raycast(transform.position, (player.transform.position - this.transform.position).normalized, Vector3.Distance(this.transform.position, player.transform.position), wallLayer));
+
+        float distToPlayer = float.MaxValue;
+        bool isPlayerInSight = false;
+        if (player != null)
+        {
+            distToPlayer = Vector3.Distance(corpse.transform.position, player.transform.position);
+            isPlayerInSight = !(Physics.Raycast(transform.position, (player.transform.position - this.transform.position).normalized, Vector3.Distance(this.transform.position, player.transform.position), wallLayer));
+        }
         float minDist = 8f;
 
         if (suspects.Length <= 0) { if ((distToPlayer <= 9f) && (isPlayerInSight)) { tempSuspect = player; } }
@@ -309,7 +319,7 @@ public class PoliceController : MonoBehaviour
         resolveCoroutine = false;
         returnCoroutine = false;
         yield return null;
-        agent.speed = 11f;
+        agent.speed = chaseSpeed;
         float elapsedTime = 0f;
 
         Debug.Log("추격 시작 / 추격 대상 : " + Suspect.name);
@@ -322,6 +332,7 @@ public class PoliceController : MonoBehaviour
 
         while ((elapsedTime < chaseTime) && (Suspect != null))
         {
+            if (isDead) yield break;
             if (Suspect == null) break;
             if (Suspect.CompareTag("NPC"))
             {
@@ -351,7 +362,7 @@ public class PoliceController : MonoBehaviour
         if (player != null) player.GetComponent<PlayerController>().outChased();
         Suspect = null;
         Debug.Log("추격 종료");
-        agent.speed = 6f;
+        agent.speed = returnSpeed;
         ChangeState(State.RETURN);
     }
     // Resolve 상태 구현
@@ -361,9 +372,10 @@ public class PoliceController : MonoBehaviour
         chaseCoroutine = false;
         resolveCoroutine = true;
         returnCoroutine = false;
-        agent.speed = 6f;
+        agent.speed = moveSpeed;
         while (Corpse.Count >= 1)
         {
+            if (isDead) yield break;
             GameObject minCorpse = Corpse[0];
             float minDist = float.MaxValue;
             foreach (GameObject corpse in Corpse)
@@ -373,6 +385,7 @@ public class PoliceController : MonoBehaviour
             }
             while (true)
             {
+                if (isDead) yield break;
                 agent.SetDestination(minCorpse.transform.position);
                 if ((transform.position - minCorpse.transform.position).magnitude <= 2f)
                 {
@@ -396,15 +409,17 @@ public class PoliceController : MonoBehaviour
         chaseCoroutine = false;
         resolveCoroutine = false;
         returnCoroutine = true;
-        agent.speed = 5f;
+        agent.speed = moveSpeed;
         while ((transform.position - policeCar.transform.position).magnitude >= 1f)
         {
+            if (isDead) yield break;
             agent.SetDestination(policeCar.transform.position);
             if (((state == State.WAIT) || (state == State.RESOLVE)) && (oldState != State.CHASE)) { yield break; }
             if (state == State.CHASE) { yield break; }
             yield return null;
         }
         transform.position = policeCar.transform.position;
+        policeCar.GetComponent<PoliceCarController>().leaveSign();
         OneGameManager.Instance.plusCorpse(Corpse);
         cWait();
     }
@@ -423,7 +438,7 @@ public class PoliceController : MonoBehaviour
     // 캐릭터 업고 있는 것 표현
     IEnumerator cCarryBody(GameObject body)
     {
-        agent.speed = 4f;
+        agent.speed = carrySpeed;
         isCarrying = true;
         suspectBody = body;
         while (true)
@@ -477,6 +492,7 @@ public class PoliceController : MonoBehaviour
     IEnumerator ArrestPlayer()
     {
         OneGameManager.Instance.GameOver();
+        player.GetComponent<PlayerController>().fDead();
         yield return null;
         Destroy(this.gameObject);
     }

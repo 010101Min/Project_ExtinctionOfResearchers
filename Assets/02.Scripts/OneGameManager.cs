@@ -35,6 +35,8 @@ public class OneGameManager : MonoBehaviour
     public GameObject policeCarPrefab;
     public GameObject CameraPos;
 
+    private GameObject[] bombs;
+
     public List<GameObject> Corpses = new List<GameObject>();
 
     private void Awake()
@@ -55,11 +57,20 @@ public class OneGameManager : MonoBehaviour
         }
         OneGameUIController.Instance.targetCount(targetCount, 0);
         OneGameUIController.Instance.peopleCount(peopleCount, 0);
+        bombs = GameObject.FindGameObjectsWithTag("Bomb");
     }
 
     void Update()
     {
         if (Input.GetKeyUp(KeyCode.Escape)) { GamePaused(); }
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            foreach (GameObject bomb in bombs) {  bomb.GetComponent<BombController>().showCrossHair(); }
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftControl))
+        {
+            foreach (GameObject bomb in bombs) { bomb.GetComponent<BombController>().hideCrossHair(); }
+        }
         if (!isGameOver && !isGameClear && !isGamePaused)
         {
             time += Time.deltaTime;
@@ -147,11 +158,10 @@ public class OneGameManager : MonoBehaviour
     public void Report(GameObject reporter, GameObject corpse, GameObject suspect)
     {
         GameObject[] polices = GameObject.FindGameObjectsWithTag("Police");
+        GameObject policeCar = GameObject.FindGameObjectWithTag("PoliceCar");
         bool PoliceExist = false;
         if (polices != null)
         {
-            // 경찰 출동 없이 쫓던 거나 계속 쫓음
-            //police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 10 + (policeCount * 5));
             foreach (GameObject police in polices)
             {
                 if (!police.GetComponent<PoliceController>().getDead())
@@ -161,12 +171,12 @@ public class OneGameManager : MonoBehaviour
                 }
             }
         }
-        if (!PoliceExist)
+        // 만약 살아있는 경찰이 없고, 경찰차도 없다면
+        if (!PoliceExist && (policeCar == null || policeCar.GetComponent<PoliceCarController>().getLeave()))
         {
             // 경찰 출동
-            GameObject policeCar = Instantiate(policeCarPrefab);
-            GameObject police = Instantiate(policePrefab, policeCar.transform.position, Quaternion.identity);
-            police.GetComponent<PoliceController>().Report(reporter, corpse, suspect, 15 + (policeCount * 5));
+            GameObject policecar = Instantiate(policeCarPrefab);
+            policecar.GetComponent<PoliceCarController>().GetReport(reporter, corpse, suspect, 15 + (policeCount * 5));
             policeCount++;
         }
     }

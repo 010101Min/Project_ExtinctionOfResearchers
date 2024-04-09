@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 public class NPCStatusIconController : MonoBehaviour
 {
@@ -57,21 +58,25 @@ public class NPCStatusIconController : MonoBehaviour
 
             if (distance > 100f) { AliveStatus.SetActive(false); DeadStatus.SetActive(false); return; }
 
+            Vector3 viewportPos = mainCamera.WorldToViewportPoint(npc.transform.position);
+            bool isInView = viewportPos.z > 0 && viewportPos.x > 0 && viewportPos.x < 1 && viewportPos.y > 0 && viewportPos.y < 1;
+
             // 카메라와 UI 사이에 벽이 있는지 확인
             RaycastHit hit;
-            if (Physics.Raycast(mainCamera.transform.position, (npc.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer))
-            {
-                // 벽에 가려졌을 경우 UI 요소 숨김
-                AliveStatus.SetActive(false);
-                DeadStatus.SetActive(false);
-            }
-            else
+            if ((!Physics.Raycast(mainCamera.transform.position, (npc.transform.position - mainCamera.transform.position).normalized, out hit, distance, wallLayer)) && isInView)
             {
                 // 벽에 가려지지 않았을 경우 UI 요소 보임
                 AliveStatus.SetActive(true);
                 DeadStatus.SetActive(true);
             }
+            else
+            {
+                // 벽에 가려졌을 경우 UI 요소 숨김
+                AliveStatus.SetActive(false);
+                DeadStatus.SetActive(false);
+            }
         }
+        else { Destroy(gameObject); }
     }
 
     public void setNpc(GameObject npc) { this.npc = npc; }
