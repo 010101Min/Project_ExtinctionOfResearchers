@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ClothesController : MonoBehaviour
+public class NPCClothesController : MonoBehaviour
 {
     public GameObject skin_head;
     public GameObject skin_body;

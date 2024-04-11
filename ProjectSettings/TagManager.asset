@@ -16,6 +16,7 @@ TagManager:
   - ShortCut
   - NPCPos
   - Teleport
+  - Handcuff
   layers:
   - Default
   - TransparentFX

@@ -288,7 +288,7 @@ public class PoliceController : MonoBehaviour
             for (int i = 0; i < suspects.Length; i++)
             {
                 Vector3 dirToSuspect = (suspects[i].gameObject.transform.position - corpse.transform.position).normalized;
-                
+
                 float distToSuspect = Vector3.Distance(corpse.transform.position, suspects[i].gameObject.transform.position);
                 if (!Physics.Raycast(corpse.transform.position, dirToSuspect, distToSuspect, wallLayer) && (distToSuspect <= minDist))
                 {
@@ -323,6 +323,12 @@ public class PoliceController : MonoBehaviour
         agent.speed = chaseSpeed;
         float elapsedTime = 0f;
 
+        if (player != null)
+        {
+            if (Suspect.Equals(player)) { player.GetComponent<PlayerController>().inChased(); }
+            else { player.GetComponent<PlayerController>().outChased(); }
+        }
+
         Debug.Log("추격 시작 / 추격 대상 : " + Suspect.name);
         if (Suspect.Equals(player)) { player.GetComponent<PlayerController>().inChased(); }
         else
@@ -339,8 +345,7 @@ public class PoliceController : MonoBehaviour
             {
                 if (Suspect.GetComponent<NPCController>().fGetDead())
                 {
-                    Destroy(handCuff);
-                    handCuff = null;
+                    EraseHandcuff();
                     break;
                 }
             }
@@ -351,8 +356,7 @@ public class PoliceController : MonoBehaviour
                 if (Suspect.CompareTag("NPC"))
                 {
                     Suspect.GetComponent<NPCController>().fGetArrested();
-                    Destroy(handCuff);
-                    handCuff = null;
+                    EraseHandcuff();
                 }
                 StartCoroutine(cCarryBody(Suspect));
                 break;
@@ -509,5 +513,14 @@ public class PoliceController : MonoBehaviour
             yield return null;
         }
         yield break;
+    }
+    void EraseHandcuff()
+    {
+        if (handCuff != null)
+        {
+            GameObject[] handcuffs = GameObject.FindGameObjectsWithTag("Handcuff");
+            foreach (GameObject handcuff in handcuffs) { Destroy(handcuff); }
+            handCuff = null;
+        }
     }
 }

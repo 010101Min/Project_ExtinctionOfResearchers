@@ -131,7 +131,7 @@ public class NPCController : MonoBehaviour
         icon = Instantiate(Icon, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
         while (true)
         {
-            if (icon != null) { icon.GetComponent <NPCStatusIconController>().setNpc(this.gameObject); break; }
+            if (icon != null) { icon.GetComponent<NPCStatusIconController>().setNpc(this.gameObject); break; }
             yield return null;
         }
         yield break;
@@ -238,7 +238,7 @@ public class NPCController : MonoBehaviour
     {
         if (!isDead) { fDead(); OneGameManager.Instance.addScore(40); }
         isHidden = true;
-        
+
         gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE");
         StartCoroutine(cHide());
     }
