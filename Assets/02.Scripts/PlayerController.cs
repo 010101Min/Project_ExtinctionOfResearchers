@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     public Image HandCuff;
     public Image Stamina_Box;
     public Image Stamina_Bar;
+    public GameObject ArrestLight;
     private Coroutine refillStaminaCoroutine;
     private bool isChased = false;
     private bool isCarrying;
@@ -67,6 +68,7 @@ public class PlayerController : MonoBehaviour
         Stamina_Bar.enabled = false;
 
         teleport = GameObject.FindGameObjectWithTag("Teleport");
+        ArrestLight.gameObject.SetActive(false);
     }
 
     void Update()
@@ -373,11 +375,13 @@ public class PlayerController : MonoBehaviour
     {
         isChased = true;
         HandCuff.enabled = true;
+        ArrestLight.gameObject.SetActive(true);
     }
     public void outChased()
     {
         isChased = false;
         HandCuff.enabled = false;
+        ArrestLight.gameObject.SetActive(false);
     }
     public bool getChased() { return isChased; }
 

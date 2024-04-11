@@ -5228,6 +5228,7 @@ MonoBehaviour:
   HandCuff: {fileID: 1577025119}
   Stamina_Box: {fileID: 976899291}
   Stamina_Bar: {fileID: 1269236809}
+  ArrestLight: {fileID: 1809631399}
 --- !u!136 &1475870611
 CapsuleCollider:
   m_ObjectHideFlags: 0

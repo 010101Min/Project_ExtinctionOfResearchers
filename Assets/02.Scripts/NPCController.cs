@@ -63,6 +63,7 @@ public class NPCController : MonoBehaviour
     {
         // 시비에 넘어갈 확률 배정
         // 랜덤 외모 배정
+        anim = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player");
         state = State.MOVE;
@@ -119,11 +120,6 @@ public class NPCController : MonoBehaviour
         int rand = Random.Range(11, 91);
         fProvoke = rand;
     }
-    // 랜덤 외모 배정 (구현 전)
-    private void RandomAppearance()
-    {
-
-    }
 
     // UI 아이콘들용 함수
     IEnumerator cSetIcons()
@@ -179,6 +175,7 @@ public class NPCController : MonoBehaviour
     // 사망시 불러올 함수
     public void fDead()
     {
+        anim.SetTrigger("Die");
         initCoroutine();
         isDead = true;
         agent.enabled = false;
@@ -270,6 +267,7 @@ public class NPCController : MonoBehaviour
     // 구속시 불러올 함수
     public void fGetArrested()
     {
+        fanim("Carried");
         initCoroutine();
         state = State.ARRESTED;
         agent.enabled = false;
@@ -279,6 +277,7 @@ public class NPCController : MonoBehaviour
     }
     public void fOutArrested()
     {
+        fanim("Walk");
         witnessable = true;
         fProvoke = tempfProvoke;
         isCarriable = false;
@@ -297,7 +296,7 @@ public class NPCController : MonoBehaviour
     }
 
     // IDLE 상태 구현
-    private void fIdle() { initCoroutine(); idleCoroutine = StartCoroutine(cIdle()); }
+    private void fIdle() { fanim("Idle"); initCoroutine(); idleCoroutine = StartCoroutine(cIdle()); }
     IEnumerator cIdle()
     {
         agent.enabled = false;
@@ -309,9 +308,47 @@ public class NPCController : MonoBehaviour
         if (nextState <= 80) { state = State.MOVE; }
         else { state = State.SLEEP; }
     }
+    private void fanim(string sState)
+    {
+        if (sState == "Idle")
+        {
+            anim.SetBool("Carried", false);
+            anim.SetBool("Sleep", false);
+            anim.SetBool("Run", false);
+            anim.SetBool("Walk", false);
+        }
+        else if (sState == "Walk")
+        {
+            anim.SetBool("Carried", false);
+            anim.SetBool("Sleep", false);
+            anim.SetBool("Run", false);
+            anim.SetBool("Walk", true);
+        }
+        else if (sState == "Run")
+        {
+            anim.SetBool("Carried", false);
+            anim.SetBool("Sleep", false);
+            anim.SetBool("Run", true);
+            anim.SetBool("Walk", false);
+        }
+        else if (sState == "Sleep")
+        {
+            anim.SetBool("Carried", false);
+            anim.SetBool("Sleep", true);
+            anim.SetBool("Run", false);
+            anim.SetBool("Walk", false);
+        }
+        else if (sState == "Carried")
+        {
+            anim.SetBool("Carried", true);
+            anim.SetBool("Sleep", false);
+            anim.SetBool("Run", false);
+            anim.SetBool("Walk", false);
+        }
+    }
 
     // MOVE 상태 구현
-    private void fMove() { initCoroutine(); moveCoroutine = StartCoroutine(cMove()); }
+    private void fMove() { fanim("Walk"); initCoroutine(); moveCoroutine = StartCoroutine(cMove()); }
     IEnumerator cMove()
     {
         agent.enabled = true;
@@ -334,9 +371,11 @@ public class NPCController : MonoBehaviour
     }
 
     // SLEEP 상태 구현
-    private void fSleep() { initCoroutine(); sleepCoroutine = StartCoroutine(cSleep()); }
+    private void fSleep() { fanim("Sleep"); initCoroutine(); sleepCoroutine = StartCoroutine(cSleep()); }
     IEnumerator cSleep()
     {
+        yield return new WaitForSeconds(2.133f);
+
         icon.GetComponent<NPCStatusIconController>().showSleeping();
 
         agent.enabled = false;
@@ -352,6 +391,8 @@ public class NPCController : MonoBehaviour
         fProvoke = tempfProvoke;
         isCarriable = false;
         icon.GetComponent<NPCStatusIconController>().showOutSleeping();
+        anim.SetBool("Sleep", false);
+        yield return new WaitForSeconds(1.67f);
 
         sleepCoroutine = null;
         int nextState = Random.Range(1, 101);
@@ -360,7 +401,7 @@ public class NPCController : MonoBehaviour
     }
 
     // Report 상태 구현
-    private void fReport(GameObject corpse) { initCoroutine(); reportCoroutine = StartCoroutine(cReport(corpse)); }
+    private void fReport(GameObject corpse) { fanim("Run"); initCoroutine(); reportCoroutine = StartCoroutine(cReport(corpse)); }
     private GameObject findPlace(ref bool isPoliceExist, bool tempProvokable)
     {
         float minDistance = float.MaxValue;

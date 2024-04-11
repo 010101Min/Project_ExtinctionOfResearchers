@@ -208,7 +208,8 @@ public class OneGameManager : MonoBehaviour
     }
     public void plusCorpse(List<GameObject> corpses)
     {
-        foreach(GameObject corpse in corpses) { Corpses.Add(corpse); }
+        Debug.Log("plusCorpse 불렸다");
+        foreach(GameObject corpse in corpses) { Debug.Log("시신 이름: " + corpse.name); Corpses.Add(corpse); }
         if (Corpses.Count >= 3) { ParamedicReport(Corpses); Corpses.Clear(); }
     }
 
