@@ -5,16 +5,17 @@ using UnityEngine;
 public class PlayerLookAround : MonoBehaviour
 {
     public float turnSpeed = 120f;
-    Transform tr;
+    Rigidbody rb;
 
     void Start()
     {
-        tr = GetComponent<Transform>();
+        rb = GetComponent<Rigidbody>();
     }
     
     void Update()
     {
         float r = Input.GetAxis("Mouse X");
-        tr.Rotate(Vector3.up * turnSpeed * Time.deltaTime * r);
+        float turn = r * turnSpeed * Time.deltaTime;
+        rb.rotation = rb.rotation * Quaternion.Euler(0f, turn, 0f);
     }
 }

@@ -43,6 +43,7 @@ public class NPCController : MonoBehaviour
     private int fProvoke = 0;
     private int tempfProvoke = 0;
     private float DeathTimer = 0f;
+    public float range = 5f;
 
     int npcLayer;
     int corpseLayer;
@@ -358,8 +359,8 @@ public class NPCController : MonoBehaviour
         agent.enabled = true;
         agent.speed = moveSpeed;
         int movePos = Random.Range(0, pos.Length);
-        float variX = Random.Range(-8f, 8f);
-        float variZ = Random.Range(-8f, 8f);
+        float variX = Random.Range(-range, range);
+        float variZ = Random.Range(-range, range);
         Vector3 dest = new Vector3(pos[movePos].transform.position.x + variX, 0f, pos[movePos].transform.position.z + variZ);
 
         while ((transform.position - dest).magnitude >= 0.1f)

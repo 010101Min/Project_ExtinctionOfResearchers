@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour
     GameObject nearestCarriable = null;
     GameObject teleport = null;
     Transform tr;
+    Rigidbody rb;
 
     int visiblenpcLayer;
     int invisiblenpcLayer;
@@ -44,6 +45,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         tr = GetComponent<Transform>();
+        rb = GetComponent<Rigidbody>();
 
         visiblenpcLayer = 1 << LayerMask.NameToLayer("NPC");
         invisiblenpcLayer = 1 << LayerMask.NameToLayer("INVISIBLENPC");
@@ -83,7 +85,8 @@ public class PlayerController : MonoBehaviour
         else if (!Input.GetKey(KeyCode.LeftShift) || (x == 0 && z == 0)) { isRunning = false; }
 
         Vector3 moveDirection = new Vector3(x, 0f, z);
-        tr.Translate(moveDirection * moveSpeed * Time.deltaTime);
+        moveDirection = transform.TransformDirection(moveDirection);
+        rb.velocity = moveDirection * moveSpeed;
 
         findObject(out nearestNPC, out nearestBomb, out nearestWindow, out nearestShortcut, out nearestCarriable);
 
