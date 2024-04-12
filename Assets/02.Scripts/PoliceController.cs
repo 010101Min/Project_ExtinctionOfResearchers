@@ -475,7 +475,7 @@ public class PoliceController : MonoBehaviour
             if (body.CompareTag("NPC")) { body.transform.position = carryPos.position; body.layer = LayerMask.NameToLayer("UNINTERACTABLE"); }
             else
             {
-                body.GetComponent<PlayerController>().inArrested(carryPos.position);
+                body.GetComponent<PlayerController>().inArrested(this.gameObject);
                 body.GetComponent<PlayerController>().endRun();
                 body.GetComponent<PlayerController>().enabled = false;
                 OneGameUIController.Instance.Clearall();
@@ -495,6 +495,8 @@ public class PoliceController : MonoBehaviour
         if (body.CompareTag("NPC")) { body.gameObject.GetComponent<NPCController>().fOutArrested(); body.layer = LayerMask.NameToLayer("NPC"); }
         else { body.GetComponent<PlayerController>().enabled = true; body.GetComponent<PlayerController>().outArrested(); }
     }
+    public Transform fGetHeadPos() { return carryPos; }
+    public float fGetSpeed() { return agent.velocity.magnitude; }
     IEnumerator ArrestNPC()
     {
         suspectBody.GetComponent<NPCController>().fDead();

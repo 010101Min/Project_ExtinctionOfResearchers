@@ -388,20 +388,19 @@ public class PlayerController : MonoBehaviour
         ArrestLight.gameObject.SetActive(false);
     }
     public bool getChased() { return isChased; }
-    public void inArrested(Vector3 policePos)
+    public void inArrested(GameObject Police)
     {
         isArrested = true;
-        StartCoroutine(cArrested(policePos));
+        StartCoroutine(cArrested(Police));
     }
     public void outArrested() { isArrested = false; this.transform.position = new Vector3(this.transform.position.x, 0f, this.transform.position.z); }
-    IEnumerator cArrested(Vector3 policeHeadPos)
+    IEnumerator cArrested(GameObject police)
     {
         while (true)
         {
             if (!isArrested) break;
-            Vector3 moveDirection = (policeHeadPos - this.transform.position).normalized;
-            moveDirection = transform.TransformDirection(moveDirection);
-            rb.velocity = moveDirection * moveSpeed;
+            Vector3 moveDirection = (police.GetComponent<PoliceController>().fGetHeadPos().position - this.transform.position).normalized;
+            rb.velocity = moveDirection * (police.GetComponent<PoliceController>().fGetSpeed());
             yield return null;
         }
     }
