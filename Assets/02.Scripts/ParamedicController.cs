@@ -54,7 +54,7 @@ public class ParamedicController : MonoBehaviour
         GameObject destCorpse = findNearestCorpse(Corpses);
         while (true)
         {
-            if (destCorpse == null) break;
+            if (destCorpse == null) { break; }
             agent.SetDestination(destCorpse.transform.position);
             if ((transform.position - destCorpse.transform.position).magnitude <= 1f) { break; }
             yield return null;
@@ -85,7 +85,7 @@ public class ParamedicController : MonoBehaviour
         while (true)
         {
             agent.SetDestination(ambulance.transform.position);
-            if (Vector3.Distance(this.gameObject.transform.position, ambulance.transform.position) <= 0.5f) { break; }
+            if (Vector3.Distance(this.gameObject.transform.position, ambulance.transform.position) <= 1f) { break; }
             yield return null;
         }
         this.gameObject.transform.position = ambulance.transform.position;
