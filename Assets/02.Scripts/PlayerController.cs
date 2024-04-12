@@ -338,12 +338,12 @@ public class PlayerController : MonoBehaviour
             if (!isCarrying) { yield break; }
             if (body.CompareTag("NPC"))
             {
-                if (body.GetComponent<NPCController>().fGetCarriable()) { body.transform.position = carryPos.position; }
+                if (body.GetComponent<NPCController>().fGetCarriable()) { body.GetComponent<NPCController>().fanim("Carried"); body.transform.position = carryPos.position; }
                 else { dropBody(body); yield break; }
             }
             else if (body.CompareTag("Police"))
             {
-                if (body.GetComponent<PoliceController>().fGetCarriable()) { body.transform.position = carryPos.position; }
+                if (body.GetComponent<PoliceController>().fGetCarriable()) { body.GetComponent<PoliceController>().fanim("Carried"); body.transform.position = carryPos.position; }
                 else { dropBody(body); yield break; }
             }
             yield return null;

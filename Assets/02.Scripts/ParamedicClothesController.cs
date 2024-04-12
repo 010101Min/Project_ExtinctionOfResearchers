@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PoliceClothesController : MonoBehaviour
+public class ParamedicClothesController : MonoBehaviour
 {
     public GameObject skin_head;
     public GameObject skin_body;
@@ -13,8 +13,7 @@ public class PoliceClothesController : MonoBehaviour
     public GameObject hair_d;
     public GameObject hair_e;
 
-    public GameObject police_suit;
-    public GameObject police_suit_hat;
+    public GameObject nurse_suit;
 
     public Texture[] skin_textures;
 
@@ -24,17 +23,17 @@ public class PoliceClothesController : MonoBehaviour
     public Texture[] hair_d_textures;
     public Texture[] hair_e_textures;
 
-    public Texture police_suit_texture;
+    public Texture nurse_suit_texture;
 
     void Start()
     {
+
         hair_a.SetActive(false);
         hair_b.SetActive(false);
         hair_c.SetActive(false);
         hair_d.SetActive(false);
         hair_e.SetActive(false);
-        police_suit.SetActive(false);
-        police_suit_hat.SetActive(false);
+        nurse_suit.SetActive(false);
 
         // determining skin color
 
@@ -52,6 +51,7 @@ public class PoliceClothesController : MonoBehaviour
         // male
         if (male_female == 0)
         {
+
             // choose hair type   hair_a , hair_b  , hair_e
             int hair = UnityEngine.Random.Range(0, 3);
 
@@ -133,9 +133,8 @@ public class PoliceClothesController : MonoBehaviour
             }
         }
 
-        police_suit.SetActive(true);
-        police_suit.GetComponent<Renderer>().materials[0].mainTexture = police_suit_texture;
-        police_suit_hat.SetActive(true);
-        police_suit_hat.GetComponent<Renderer>().materials[0].mainTexture = police_suit_texture;
+        nurse_suit.SetActive(true);
+
+        nurse_suit.GetComponent<Renderer>().materials[0].mainTexture = nurse_suit_texture;
     }
 }

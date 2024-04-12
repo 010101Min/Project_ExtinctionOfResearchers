@@ -295,20 +295,8 @@ public class NPCController : MonoBehaviour
         sleepCoroutine = null;
     }
 
-    // IDLE 상태 구현
-    private void fIdle() { fanim("Idle"); initCoroutine(); idleCoroutine = StartCoroutine(cIdle()); }
-    IEnumerator cIdle()
-    {
-        agent.enabled = false;
-        fStateTime = Random.Range(5f, 50f);
-        yield return new WaitForSeconds(fStateTime);
-
-        idleCoroutine = null;
-        int nextState = Random.Range(1, 101);
-        if (nextState <= 80) { state = State.MOVE; }
-        else { state = State.SLEEP; }
-    }
-    private void fanim(string sState)
+    // 애니메이션 구현
+    public void fanim(string sState)
     {
         if (sState == "Idle")
         {
@@ -346,6 +334,21 @@ public class NPCController : MonoBehaviour
             anim.SetBool("Walk", false);
         }
     }
+
+    // IDLE 상태 구현
+    private void fIdle() { fanim("Idle"); initCoroutine(); idleCoroutine = StartCoroutine(cIdle()); }
+    IEnumerator cIdle()
+    {
+        agent.enabled = false;
+        fStateTime = Random.Range(5f, 50f);
+        yield return new WaitForSeconds(fStateTime);
+
+        idleCoroutine = null;
+        int nextState = Random.Range(1, 101);
+        if (nextState <= 80) { state = State.MOVE; }
+        else { state = State.SLEEP; }
+    }
+    
 
     // MOVE 상태 구현
     private void fMove() { fanim("Walk"); initCoroutine(); moveCoroutine = StartCoroutine(cMove()); }
@@ -401,7 +404,7 @@ public class NPCController : MonoBehaviour
     }
 
     // Report 상태 구현
-    private void fReport(GameObject corpse) { fanim("Run"); initCoroutine(); reportCoroutine = StartCoroutine(cReport(corpse)); }
+    private void fReport(GameObject corpse) { initCoroutine(); reportCoroutine = StartCoroutine(cReport(corpse)); }
     private GameObject findPlace(ref bool isPoliceExist, bool tempProvokable)
     {
         float minDistance = float.MaxValue;
@@ -536,8 +539,10 @@ public class NPCController : MonoBehaviour
         // NPC - 시신 - 용의자 선 긋기
         LineController.Instance.DrawLine(this.gameObject, this.transform, corpse.transform);
         if (Suspect != null) { LineController.Instance.DrawLine(this.gameObject, corpse.transform, Suspect.transform); }
+        fanim("Idle");
         yield return new WaitForSeconds(0.5f);
 
+        fanim("Run");
         agent.enabled = true;
         agent.speed = runSpeed;
 

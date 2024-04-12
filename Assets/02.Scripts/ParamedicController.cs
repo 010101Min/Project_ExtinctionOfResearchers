@@ -18,6 +18,7 @@ public class ParamedicController : MonoBehaviour
 
     private NavMeshAgent agent;
     private Animator anim;
+    private bool isResolving = false;
 
     public List<GameObject> Corpses = new List<GameObject>();
 
@@ -26,14 +27,19 @@ public class ParamedicController : MonoBehaviour
         this.gameObject.transform.position = ambulance.transform.position;
         agent = GetComponent<NavMeshAgent>();
         agent.speed = 7f;
+        anim = GetComponentInChildren<Animator>();
+        anim.SetBool("Finish", true); anim.SetBool("Resolve", false);
     }
 
     public void Report(List<GameObject> Corps)
     {
         foreach (GameObject corp in Corps) { Corpses.Add(corp); }
-        StopCoroutine(cCome());
-        StopCoroutine(cReturn());
-        StartCoroutine(cCome());
+        if (!isResolving)
+        {
+            StopCoroutine(cCome());
+            StopCoroutine(cReturn());
+            StartCoroutine(cCome());
+        }
     }
 
     // Come 상태 구현
@@ -51,6 +57,7 @@ public class ParamedicController : MonoBehaviour
     }
     IEnumerator cCome()
     {
+        anim.SetBool("Finish", false); anim.SetBool("Resolve", false);
         GameObject destCorpse = findNearestCorpse(Corpses);
         while (true)
         {
@@ -65,6 +72,8 @@ public class ParamedicController : MonoBehaviour
     // Resolve 상태 구현
     IEnumerator cResolve(GameObject corpse)
     {
+        anim.SetBool("Finish", false); anim.SetBool("Resolve", true);
+        isResolving = true;
         float elapsedTime = 0f;
 
         while (elapsedTime < 1f)
@@ -77,11 +86,13 @@ public class ParamedicController : MonoBehaviour
         Corpses.Remove(corpse);
         if (Corpses.Count > 0) { StartCoroutine(cCome()); }
         else { StartCoroutine(cReturn()); }
+        isResolving = false;
     }
 
     // Return 상태 구현
     IEnumerator cReturn()
     {
+        anim.SetBool("Finish", false); anim.SetBool("Resolve", false);
         while (true)
         {
             agent.SetDestination(ambulance.transform.position);
@@ -89,6 +100,7 @@ public class ParamedicController : MonoBehaviour
             yield return null;
         }
         this.gameObject.transform.position = ambulance.transform.position;
+        anim.SetBool("Finish", true); anim.SetBool("Resolve", false);
     }
 
     // Wait 상태 구현

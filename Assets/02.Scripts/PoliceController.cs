@@ -21,6 +21,7 @@ public class PoliceController : MonoBehaviour
     public State state;
     public Transform carryPos;
     NavMeshAgent agent;
+    private Animator anim;
     private GameObject Suspect;
     public List<GameObject> Corpse = new List<GameObject>();
     private GameObject policeCar;
@@ -55,6 +56,7 @@ public class PoliceController : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         agent.speed = moveSpeed;
+        anim = GetComponentInChildren<Animator>();
         policeCar = GameObject.FindGameObjectWithTag("PoliceCar");
         player = GameObject.FindGameObjectWithTag("Player");
 
@@ -149,6 +151,28 @@ public class PoliceController : MonoBehaviour
         }
         yield break;
     }
+    // 애니메이션 함수
+    public void fanim(string sState)
+    {
+        if (sState == "Walk")
+        {
+            anim.SetBool("Carried", false);
+            anim.SetBool("Run", false);
+            anim.SetBool("Walk", true);
+        }
+        else if (sState == "Run")
+        {
+            anim.SetBool("Carried", false);
+            anim.SetBool("Run", true);
+            anim.SetBool("Walk", false);
+        }
+        else if (sState == "Carried")
+        {
+            anim.SetBool("Carried", true);
+            anim.SetBool("Run", false);
+            anim.SetBool("Walk", false);
+        }
+    }
     // 사망시 불러올 함수
     public void fDead()
     {
@@ -157,6 +181,7 @@ public class PoliceController : MonoBehaviour
         isDead = true;
         agent.enabled = false;
         isCarriable = true;
+        anim.SetTrigger("Die");
         deadState.GetComponent<DeadIconController>().showDead();
         gameObject.layer = LayerMask.NameToLayer("CORPSE");
         state = State.DIE;
@@ -297,6 +322,7 @@ public class PoliceController : MonoBehaviour
     // Chase 상태 구현
     IEnumerator cChase()
     {
+        fanim("Run");
         StopCoroutine(cResolve());
         StopCoroutine(cReturn());
         if (chaseCoroutine) yield break;
@@ -358,6 +384,7 @@ public class PoliceController : MonoBehaviour
     // Resolve 상태 구현
     IEnumerator cResolve()
     {
+        fanim("Walk");
         if (resolveCoroutine) yield break;
         chaseCoroutine = false;
         resolveCoroutine = true;
@@ -379,6 +406,7 @@ public class PoliceController : MonoBehaviour
                 agent.SetDestination(minCorpse.transform.position);
                 if ((transform.position - minCorpse.transform.position).magnitude <= 2f)
                 {
+                    yield return new WaitForSeconds(0.5f);
                     if (minCorpse.CompareTag("NPC")) minCorpse.GetComponent<NPCController>().fResolved();
                     if (minCorpse.CompareTag("Police")) minCorpse.GetComponent<PoliceController>().fResolved();
                     Corpse.Remove(minCorpse);
@@ -395,6 +423,7 @@ public class PoliceController : MonoBehaviour
     // Return 상태 구현
     IEnumerator cReturn()
     {
+        fanim("Walk");
         if (returnCoroutine) yield break;
         chaseCoroutine = false;
         resolveCoroutine = false;
@@ -428,6 +457,7 @@ public class PoliceController : MonoBehaviour
     // 캐릭터 업고 있는 것 표현
     IEnumerator cCarryBody(GameObject body)
     {
+        fanim("Walk");
         agent.speed = carrySpeed;
         isCarrying = true;
         suspectBody = body;

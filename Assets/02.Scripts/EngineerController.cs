@@ -28,6 +28,8 @@ public class EngineerController : MonoBehaviour
         this.gameObject.transform.position = home.transform.position;
         agent = GetComponent<NavMeshAgent>();
         agent.speed = 7f;
+        anim = GetComponentInChildren<Animator>();
+        anim.SetBool("Finish", true); anim.SetBool("Destroy", false);
     }
 
     public void Report(GameObject shortcut)
@@ -52,11 +54,12 @@ public class EngineerController : MonoBehaviour
     }
     IEnumerator cCome()
     {
+        anim.SetBool("Finish", false); anim.SetBool("Destroy", false);
         GameObject destShortcut = findNearestShortcut(ShortCuts);
         while (true)
         {
             agent.SetDestination(destShortcut.GetComponent<ShortCutController>().FindShortest(this.gameObject).transform.position);
-            if ((transform.position - destShortcut.GetComponent<ShortCutController>().FindShortest(this.gameObject).transform.position).magnitude <= 1f) { break; }
+            if ((transform.position - destShortcut.GetComponent<ShortCutController>().FindShortest(this.gameObject).transform.position).magnitude <= 3f) { break; }
             yield return null;
         }
         StartCoroutine(cSabotage(destShortcut));
@@ -65,6 +68,7 @@ public class EngineerController : MonoBehaviour
     // Sabotage 상태 구현
     IEnumerator cSabotage(GameObject shortcut)
     {
+        anim.SetBool("Finish", false); anim.SetBool("Destroy", true);
         float elapsedTime = 0f;
 
         while (elapsedTime < fSabotageTime)
@@ -81,6 +85,7 @@ public class EngineerController : MonoBehaviour
     // Return 상태 구현
     IEnumerator cReturn()
     {
+        anim.SetBool("Finish", false); anim.SetBool("Destroy", false);
         while (true)
         {
             agent.SetDestination(home.transform.position);
@@ -88,12 +93,7 @@ public class EngineerController : MonoBehaviour
             yield return null;
         }
         this.gameObject.transform.position = home.transform.position;
-    }
-
-    // Wait 상태 구현
-    void fWait()
-    {
-        StopAllCoroutines();
+        anim.SetBool("Finish", true); anim.SetBool("Destroy", false);
     }
 
     void removeItems(GameObject item)
