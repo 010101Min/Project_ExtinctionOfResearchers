@@ -246,10 +246,15 @@ public class PoliceController : MonoBehaviour
         else
         {
             NPCHandcuffController.Instance.offHandcuff();
-            if ((suspect != suspectBody) && isCarrying) { dropBody(suspectBody); }
-            StopCoroutine(cChase());
-            Suspect = suspect;
-            ChangeState(State.CHASE);
+            if (suspect.CompareTag("NPC") && Suspect.Equals(player))
+            {
+                if ((suspect != suspectBody) && isCarrying) { dropBody(suspectBody); }
+                StopCoroutine(cChase());
+                Suspect = suspect;
+                ChangeState(State.CHASE);
+            }
+            // 여기 좀 더 고치기
+            sadfasdf
         }
     }
 

@@ -30,7 +30,7 @@ public class OneGameManager : MonoBehaviour
     public GameObject policePrefab;
     public GameObject npcPrefab;
     public GameObject engineer;
-    public GameObject paramedic;
+    public GameObject ambulance;
     public GameObject teleport;
     public GameObject policeCarPrefab;
     public GameObject CameraPos;
@@ -220,6 +220,6 @@ public class OneGameManager : MonoBehaviour
 
     public void ParamedicReport(List<GameObject> corpses)
     {
-        paramedic.GetComponent<ParamedicController>().Report(corpses);
+        ambulance.GetComponent<AmbulanceController>().Report(corpses);
     }
 }

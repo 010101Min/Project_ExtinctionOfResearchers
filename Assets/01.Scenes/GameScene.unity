@@ -203,6 +203,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4815746375246235357, guid: 906e5a7beb60add47880a5e03d7e5893, type: 3}
   m_PrefabInstance: {fileID: 1336422102}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &61665535
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 61665536}
+  m_Layer: 0
+  m_Name: endPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &61665536
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61665535}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -70, y: 0, z: -30}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 491675738}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &77691614
 GameObject:
   m_ObjectHideFlags: 0
@@ -1140,6 +1171,40 @@ Transform:
   - {fileID: 1767126076}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &491675737
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 491675738}
+  m_Layer: 0
+  m_Name: AmbulancePos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &491675738
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491675737}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 871677652}
+  - {fileID: 2035147553}
+  - {fileID: 61665536}
+  m_Father: {fileID: 735476958}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &531385107
 GameObject:
   m_ObjectHideFlags: 0
@@ -1985,6 +2050,7 @@ Transform:
   - {fileID: 1278215207}
   - {fileID: 921956729}
   - {fileID: 1353866122}
+  - {fileID: 491675738}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &783510273
@@ -2361,6 +2427,37 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &871677651
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 871677652}
+  m_Layer: 0
+  m_Name: startPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &871677652
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 871677651}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 130, y: 0, z: -30}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 491675738}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &876890888
 GameObject:
   m_ObjectHideFlags: 0
@@ -2498,7 +2595,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6066de43d29f8a047907d4509b46d648, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  state: 0
   ambulance: {fileID: 2551668893336527094}
   Corpses: []
 --- !u!4 &890924907
@@ -5210,7 +5306,7 @@ MonoBehaviour:
   policePrefab: {fileID: 658823264917967712, guid: 6e919e330fe0ee143a9cb1ea43169a9f, type: 3}
   npcPrefab: {fileID: 8970395315457750392, guid: 52f61be0799a0b5468ff39fb94fc4cda, type: 3}
   engineer: {fileID: 1547375691}
-  paramedic: {fileID: 890924902}
+  ambulance: {fileID: 2551668893336527094}
   teleport: {fileID: 876890888}
   policeCarPrefab: {fileID: 2573812687666044992, guid: 5074cff6e8c50574cb7768427a9d3576, type: 3}
   CameraPos: {fileID: 921956728}
@@ -7309,6 +7405,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 783510274}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2035147552
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2035147553}
+  m_Layer: 0
+  m_Name: parkPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2035147553
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035147552}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 30, y: 0, z: -30}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 491675738}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2048208189
 GameObject:
@@ -9828,6 +9955,7 @@ GameObject:
   - component: {fileID: 580847428023189619}
   - component: {fileID: 5503834705983068504}
   - component: {fileID: 3723954407512593327}
+  - component: {fileID: 7816255792183234873}
   m_Layer: 0
   m_Name: Ambulance
   m_TagString: Uninteractable
@@ -13285,6 +13413,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+--- !u!114 &7816255792183234873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2551668893336527094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65c5e1fb6df7bc24f83f8dffea0c8149, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 40
+  Paramedic: {fileID: 890924902}
+  Corpses: []
 --- !u!137 &7830625155415088713
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0

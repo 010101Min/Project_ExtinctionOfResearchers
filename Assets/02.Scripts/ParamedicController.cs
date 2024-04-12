@@ -5,26 +5,17 @@ using UnityEngine.AI;
 
 public class ParamedicController : MonoBehaviour
 {
-    public enum State
-    {
-        WAIT,
-        COME,
-        RESOLVE,
-        RETURN
-    }
-
-    public State state = State.WAIT;
     public GameObject ambulance;
 
     private NavMeshAgent agent;
     private Animator anim;
     private bool isResolving = false;
+    private bool isAble = false;
 
     public List<GameObject> Corpses = new List<GameObject>();
 
     void Start()
     {
-        this.gameObject.transform.position = ambulance.transform.position;
         agent = GetComponent<NavMeshAgent>();
         agent.speed = 7f;
         anim = GetComponentInChildren<Animator>();
@@ -34,13 +25,15 @@ public class ParamedicController : MonoBehaviour
     public void Report(List<GameObject> Corps)
     {
         foreach (GameObject corp in Corps) { Corpses.Add(corp); }
-        if (!isResolving)
+        if (!isResolving && isAble)
         {
             StopCoroutine(cCome());
             StopCoroutine(cReturn());
             StartCoroutine(cCome());
         }
     }
+
+    public void StartResolve() { isAble = true; StartCoroutine(cCome()); }
 
     // Come 상태 구현
     GameObject findNearestCorpse(List<GameObject> corpses)
@@ -100,13 +93,10 @@ public class ParamedicController : MonoBehaviour
             if (Vector3.Distance(this.gameObject.transform.position, ambulance.transform.position) <= 1f) { break; }
             yield return null;
         }
+        isAble = false;
         this.gameObject.transform.position = ambulance.transform.position;
         anim.SetBool("Finish", true); anim.SetBool("Resolve", false);
-    }
 
-    // Wait 상태 구현
-    void fWait()
-    {
-        StopAllCoroutines();
+        ambulance.GetComponent<AmbulanceController>().leaveSign();
     }
 }
