@@ -6,7 +6,9 @@ using UnityEngine.UI;
 
 public class BombController : MonoBehaviour
 {
-    //public GameObject ExplosionEffect;
+    public GameObject ExplosionEffect;
+    public GameObject FireEffect;
+
     public Image defaultBombIcon;
     public Image poisonBombIcon;
     public Image fireBombIcon;
@@ -117,7 +119,7 @@ public class BombController : MonoBehaviour
         int policeLayer = 1 << LayerMask.NameToLayer("POLICE");
         int wallLayer = 1 << LayerMask.NameToLayer("WALL");
 
-        //Instantiate(ExplosionEffect, this.transform.position, Quaternion.identity);
+        Instantiate(ExplosionEffect, this.transform.position, Quaternion.identity);
 
         Collider[] targets = Physics.OverlapSphere(transform.position, 10f, (npcLayer | policeLayer));
 
@@ -148,6 +150,7 @@ public class BombController : MonoBehaviour
     // 소화기 함수
     IEnumerator cFireUse()
     {
+        GameObject effect = Instantiate(FireEffect, this.transform.position, Quaternion.identity);
         float timer = 0f;
         int npcLayer = 1 << LayerMask.NameToLayer("NPC");
         int invisiblenpcLayer = 1 << LayerMask.NameToLayer("INVISIBLENPC");
@@ -199,6 +202,7 @@ public class BombController : MonoBehaviour
         }
 
         Destroy(fireIcon.gameObject);
+        Destroy(effect);
         Collider[] blindnpcs = Physics.OverlapSphere(transform.position, 12f, invisiblenpcLayer);
         for (int i = 0; i < blindnpcs.Length; i++) { blindnpcs[i].GetComponent<NPCController>().fOutBlinded(); }    // NPC가 실명 상태 회복
         Collider[] blindcorpses = Physics.OverlapSphere(transform.position, 10f, invisiblecorpseLayer);

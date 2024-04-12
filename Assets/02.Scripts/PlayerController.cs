@@ -351,6 +351,8 @@ public class PlayerController : MonoBehaviour
     }
     void dropBody(GameObject body)
     {
+        if (body.CompareTag("NPC")) { body.GetComponent<NPCController>().dropCorpse(); }
+        else { body.GetComponent<PoliceController>().dropCorpse(); }
         moveSpeed *= 1.6f;
         body.transform.position = new Vector3(body.transform.position.x, 0f, body.transform.position.z);
         isCarrying = false;

@@ -50,7 +50,7 @@ public class NPCStatusIconController : MonoBehaviour
         if (npc != null)
         {
             // 기본적으로 오브젝트 위에 떠있음
-            transform.position = Camera.main.WorldToScreenPoint(new Vector3(npc.transform.position.x, npc.transform.position.y + 1f, npc.transform.position.z));
+            transform.position = Camera.main.WorldToScreenPoint(npc.transform.position + Vector3.up * 1.2f);
 
             float distance = Vector3.Distance(npc.gameObject.transform.position, mainCamera.transform.position);
             float scaleRatio = Mathf.Clamp(1 - (distance / maxDistance), minScale, maxScale);

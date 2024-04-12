@@ -47,7 +47,7 @@ public class NPCHandcuffController : MonoBehaviour
         while (temp)
         {
             if (Suspect == null) break;
-            Handcuff.transform.position = Camera.main.WorldToScreenPoint(new Vector3(Suspect.transform.position.x, Suspect.transform.position.y + 2f, Suspect.transform.position.z));
+            Handcuff.transform.position = Camera.main.WorldToScreenPoint(Suspect.transform.position + Vector3.up * 2f);
 
             float distance = Vector3.Distance(Suspect.gameObject.transform.position, mainCamera.transform.position);
             float scaleRatio = Mathf.Clamp(1 - (distance / maxDistance), minScale, maxScale);

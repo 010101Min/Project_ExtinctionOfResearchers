@@ -118,6 +118,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc65a2a680986f9498d2e3eab202c21d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ExplosionEffect: {fileID: 6964101166244446012, guid: 9fdd18b3edafbd4478eaf07582cbd413, type: 3}
+  FireEffect: {fileID: 6224338239451400845, guid: ba42fb982fe373947acb7ea42977abca, type: 3}
   defaultBombIcon: {fileID: 5219291937466042517, guid: ece480e1223a321448f8840286139680, type: 3}
   poisonBombIcon: {fileID: 1875898244450243262, guid: 58562567eb62cef4492a875fef6e11e9, type: 3}
   fireBombIcon: {fileID: 5424153906258184530, guid: 65789467c3c9ceb4c90bdd9c4c2772a9, type: 3}

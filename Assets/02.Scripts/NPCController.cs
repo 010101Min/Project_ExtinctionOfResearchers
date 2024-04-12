@@ -175,7 +175,7 @@ public class NPCController : MonoBehaviour
     // 사망시 불러올 함수
     public void fDead()
     {
-        anim.SetTrigger("Die");
+        anim.SetTrigger("Die"); anim.SetBool("Carried", false); anim.SetBool("Dead", true);
         initCoroutine();
         isDead = true;
         agent.enabled = false;
@@ -334,6 +334,7 @@ public class NPCController : MonoBehaviour
             anim.SetBool("Walk", false);
         }
     }
+    public void dropCorpse() { anim.SetBool("Carried", false); }
 
     // IDLE 상태 구현
     private void fIdle() { fanim("Idle"); initCoroutine(); idleCoroutine = StartCoroutine(cIdle()); }
@@ -568,7 +569,7 @@ public class NPCController : MonoBehaviour
     }
 
     // Provoked 상태 구현
-    private void fProvoked() { initCoroutine(); provokedCoroutine = StartCoroutine(cProvoked()); }
+    private void fProvoked() { fanim("Walk"); initCoroutine(); provokedCoroutine = StartCoroutine(cProvoked()); }
     public bool fGetProvoked() { return provokable; }
     IEnumerator cProvoked()
     {

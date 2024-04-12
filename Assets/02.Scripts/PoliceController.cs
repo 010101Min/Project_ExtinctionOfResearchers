@@ -173,6 +173,7 @@ public class PoliceController : MonoBehaviour
             anim.SetBool("Walk", false);
         }
     }
+    public void dropCorpse() { anim.SetBool("Carried", false); }
     // 사망시 불러올 함수
     public void fDead()
     {
@@ -181,7 +182,7 @@ public class PoliceController : MonoBehaviour
         isDead = true;
         agent.enabled = false;
         isCarriable = true;
-        anim.SetTrigger("Die");
+        anim.SetTrigger("Die"); anim.SetBool("Dead", true);
         deadState.GetComponent<DeadIconController>().showDead();
         gameObject.layer = LayerMask.NameToLayer("CORPSE");
         state = State.DIE;
