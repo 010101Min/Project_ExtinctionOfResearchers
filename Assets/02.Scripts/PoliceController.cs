@@ -26,8 +26,6 @@ public class PoliceController : MonoBehaviour
     private GameObject policeCar;
     private GameObject player;
     private GameObject suspectBody = null;
-    public GameObject handCuffPrefab;
-    private GameObject handCuff = null;
 
     public GameObject deadStatePrefab;
     private GameObject deadState;
@@ -217,20 +215,11 @@ public class PoliceController : MonoBehaviour
             if (corpse.CompareTag("Police")) { if (!corpse.GetComponent<PoliceController>().fGetHidden() && !Corpse.Contains(corpse)) { Corpse.Add(corpse); } }
         }
         chaseTime = time;
-        if (suspect == reporter)
-        {
-            Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse);
-            if (oldState != State.CHASE) ChangeState(State.RESOLVE);
-        }
-        else if (suspect.CompareTag("NPC") && suspect.GetComponent<NPCController>().fGetDead())
-        {
-            Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 없음, 시신 : " + corpse);
-            if (oldState != State.CHASE) ChangeState(State.RESOLVE);
-        }
+        if (suspect == reporter) { if (oldState != State.CHASE) ChangeState(State.RESOLVE); }
+        else if (suspect.CompareTag("NPC") && suspect.GetComponent<NPCController>().fGetDead()) { if (oldState != State.CHASE) ChangeState(State.RESOLVE); }
         else
         {
-            if (corpse != null) { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : " + corpse.name); }
-            else { Debug.Log("신고 들어옴 신고자 : " + reporter.name + ", 용의자 : " + suspect.name + ", 시신 : 사라짐"); }
+            NPCHandcuffController.Instance.offHandcuff();
             if ((suspect != suspectBody) && isCarrying) { dropBody(suspectBody); }
             StopCoroutine(cChase());
             Suspect = suspect;
@@ -256,7 +245,6 @@ public class PoliceController : MonoBehaviour
                     if (tempCorpse.CompareTag("NPC")) tempCorpse.GetComponent<NPCController>().fDetected();
                     if (tempCorpse.CompareTag("Police")) tempCorpse.GetComponent<PoliceController>().fDetected();
                     LineController.Instance.DrawLine(this.gameObject, this.transform, tempCorpse.transform);
-                    Debug.Log("시신 목격 " + tempCorpse.name);
                     Corpse.Add(tempCorpse);
                     // Chase 중이었다면 타겟 바꾸지 않고 계속 추격, Chase 중이 아니었다면 용의자 추적
                     if (state != State.CHASE) { StartCoroutine(FindSuspect(tempCorpse)); }
@@ -267,7 +255,6 @@ public class PoliceController : MonoBehaviour
     // 용의자 찾는 함수
     IEnumerator FindSuspect(GameObject corpse)
     {
-        Debug.Log("용의자 찾기 시작");
         if (player == null) yield break;
         GameObject tempSuspect = this.gameObject;
         Collider[] suspects = Physics.OverlapSphere(corpse.transform.position, 8f, npcLayer);
@@ -297,7 +284,6 @@ public class PoliceController : MonoBehaviour
                 }
             }
             if (distToPlayer - 2 <= minDist) tempSuspect = player;
-            Debug.Log("용의자 : " + tempSuspect.name);
         }
 
         if (tempSuspect != this.gameObject)
@@ -305,7 +291,6 @@ public class PoliceController : MonoBehaviour
             LineController.Instance.DrawLine(this.gameObject, corpse.transform, tempSuspect.transform);
             Report(this.gameObject, corpse, tempSuspect, chaseTime);
         }
-        else { Debug.Log("용의자 못 찾음"); }
         yield return null;
     }
 
@@ -334,7 +319,7 @@ public class PoliceController : MonoBehaviour
         else
         {
             player.GetComponent<PlayerController>().outChased();
-            StartCoroutine(cShowHandcuff());
+            NPCHandcuffController.Instance.DrawHandcuff(Suspect);
         }
 
         while ((elapsedTime < chaseTime) && (Suspect != null))
@@ -345,7 +330,7 @@ public class PoliceController : MonoBehaviour
             {
                 if (Suspect.GetComponent<NPCController>().fGetDead())
                 {
-                    EraseHandcuff();
+                    NPCHandcuffController.Instance.offHandcuff();
                     break;
                 }
             }
@@ -356,7 +341,7 @@ public class PoliceController : MonoBehaviour
                 if (Suspect.CompareTag("NPC"))
                 {
                     Suspect.GetComponent<NPCController>().fGetArrested();
-                    EraseHandcuff();
+                    NPCHandcuffController.Instance.offHandcuff();
                 }
                 StartCoroutine(cCarryBody(Suspect));
                 break;
@@ -501,26 +486,5 @@ public class PoliceController : MonoBehaviour
         player.GetComponent<PlayerController>().fDead();
         yield return null;
         Destroy(this.gameObject);
-    }
-
-    // 수갑 아이콘 제작용 코루틴
-    IEnumerator cShowHandcuff()
-    {
-        handCuff = Instantiate(handCuffPrefab, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
-        while (true)
-        {
-            if (handCuff != null) { handCuff.GetComponent<HandCuffIconController>().setChased(Suspect); break; }
-            yield return null;
-        }
-        yield break;
-    }
-    void EraseHandcuff()
-    {
-        if (handCuff != null)
-        {
-            GameObject[] handcuffs = GameObject.FindGameObjectsWithTag("Handcuff");
-            foreach (GameObject handcuff in handcuffs) { Destroy(handcuff); }
-            handCuff = null;
-        }
     }
 }
