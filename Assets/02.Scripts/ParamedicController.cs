@@ -75,6 +75,7 @@ public class ParamedicController : MonoBehaviour
         anim.SetBool("Finish", false); anim.SetBool("Resolve", true);
         isResolving = true;
         float elapsedTime = 0f;
+        Corpses.Remove(corpse);
 
         while (elapsedTime < 1f)
         {
@@ -83,7 +84,7 @@ public class ParamedicController : MonoBehaviour
         }
         if (corpse.CompareTag("NPC")) { corpse.GetComponent<NPCController>().fResolved(); }
         else if (corpse.CompareTag("Police")) { corpse.GetComponent<PoliceController>().fResolved(); }
-        Corpses.Remove(corpse);
+        
         if (Corpses.Count > 0) { StartCoroutine(cCome()); }
         else { StartCoroutine(cReturn()); }
         isResolving = false;

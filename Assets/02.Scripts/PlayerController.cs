@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private bool isChased = false;
     private bool isCarrying;
     private bool isRunning;
+    private bool isArrested = false;
     private bool isGoalAchieved = false;
     private GameObject carryingBody = null;
 
@@ -27,7 +28,6 @@ public class PlayerController : MonoBehaviour
     GameObject nearestShortcut = null;
     GameObject nearestCarriable = null;
     GameObject teleport = null;
-    Transform tr;
     Rigidbody rb;
 
     int visiblenpcLayer;
@@ -44,7 +44,6 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        tr = GetComponent<Transform>();
         rb = GetComponent<Rigidbody>();
 
         visiblenpcLayer = 1 << LayerMask.NameToLayer("NPC");
@@ -154,7 +153,7 @@ public class PlayerController : MonoBehaviour
             if (isCarrying)
             {
                 OneGameUIController.Instance.InAbandon();
-                if (Input.GetKeyUp(KeyCode.Space)) { hideBody(carryingBody); }
+                if (Input.GetKeyUp(KeyCode.Space)) { nearestWindow.GetComponent<WindowController>().Activate(carryingBody); hideBody(carryingBody); }
             }
         }
 
@@ -389,6 +388,23 @@ public class PlayerController : MonoBehaviour
         ArrestLight.gameObject.SetActive(false);
     }
     public bool getChased() { return isChased; }
+    public void inArrested(Vector3 policePos)
+    {
+        isArrested = true;
+        StartCoroutine(cArrested(policePos));
+    }
+    public void outArrested() { isArrested = false; this.transform.position = new Vector3(this.transform.position.x, 0f, this.transform.position.z); }
+    IEnumerator cArrested(Vector3 policeHeadPos)
+    {
+        while (true)
+        {
+            if (!isArrested) break;
+            Vector3 moveDirection = (policeHeadPos - this.transform.position).normalized;
+            moveDirection = transform.TransformDirection(moveDirection);
+            rb.velocity = moveDirection * moveSpeed;
+            yield return null;
+        }
+    }
 
     public void fDead()
     {
