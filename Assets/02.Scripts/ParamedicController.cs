@@ -90,7 +90,7 @@ public class ParamedicController : MonoBehaviour
         while (true)
         {
             agent.SetDestination(ambulance.transform.position);
-            if (Vector3.Distance(this.gameObject.transform.position, ambulance.transform.position) <= 1f) { break; }
+            if (Vector3.Distance(this.gameObject.transform.position, ambulance.transform.position) <= 3f) { break; }
             yield return null;
         }
         isAble = false;

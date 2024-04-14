@@ -246,15 +246,10 @@ public class PoliceController : MonoBehaviour
         else
         {
             NPCHandcuffController.Instance.offHandcuff();
-            if (suspect.CompareTag("NPC") && Suspect.Equals(player))
-            {
-                if ((suspect != suspectBody) && isCarrying) { dropBody(suspectBody); }
-                StopCoroutine(cChase());
-                Suspect = suspect;
-                ChangeState(State.CHASE);
-            }
-            // 여기 좀 더 고치기
-            sadfasdf
+            if ((suspect != suspectBody) && isCarrying) { dropBody(suspectBody); }
+            StopCoroutine(cChase());
+            Suspect = suspect;
+            ChangeState(State.CHASE);
         }
     }
 
@@ -435,7 +430,7 @@ public class PoliceController : MonoBehaviour
         resolveCoroutine = false;
         returnCoroutine = true;
         agent.speed = moveSpeed;
-        while ((transform.position - policeCar.transform.position).magnitude >= 1f)
+        while ((transform.position - policeCar.transform.position).magnitude >= 3f)
         {
             if (isDead) yield break;
             agent.SetDestination(policeCar.transform.position);
@@ -477,7 +472,12 @@ public class PoliceController : MonoBehaviour
                 dropBody(body);
                 yield break;
             }
-            if (body.CompareTag("NPC")) { body.transform.position = carryPos.position; body.layer = LayerMask.NameToLayer("UNINTERACTABLE"); }
+            if (body.CompareTag("NPC"))
+            {
+                body.transform.position = carryPos.position;
+                body.layer = LayerMask.NameToLayer("UNINTERACTABLE");
+                if (body.GetComponent<NPCController>().fGetDead()) { dropBody(body); }
+            }
             else
             {
                 body.GetComponent<PlayerController>().inArrested(this.gameObject);
@@ -497,7 +497,11 @@ public class PoliceController : MonoBehaviour
         isCarrying = false;
         suspectBody = null;
 
-        if (body.CompareTag("NPC")) { body.gameObject.GetComponent<NPCController>().fOutArrested(); body.layer = LayerMask.NameToLayer("NPC"); }
+        if (body.CompareTag("NPC"))
+        {
+            body.gameObject.GetComponent<NPCController>().fOutArrested();
+            if (!body.GetComponent<NPCController>().fGetDead()) { body.layer = LayerMask.NameToLayer("NPC"); }
+        }
         else { body.GetComponent<PlayerController>().enabled = true; body.GetComponent<PlayerController>().outArrested(); }
     }
     public Transform fGetHeadPos() { return carryPos; }

@@ -8,8 +8,10 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 8f;
-    
+
+    private Animator anim;
     public Transform carryPos;
+    public Transform eyePos;
     public Image HandCuff;
     public Image Stamina_Box;
     public Image Stamina_Bar;
@@ -45,6 +47,8 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        anim = GetComponentInChildren<Animator>();
 
         visiblenpcLayer = 1 << LayerMask.NameToLayer("NPC");
         invisiblenpcLayer = 1 << LayerMask.NameToLayer("INVISIBLENPC");
@@ -84,6 +88,8 @@ public class PlayerController : MonoBehaviour
         else if (!Input.GetKey(KeyCode.LeftShift) || (x == 0 && z == 0)) { isRunning = false; }
 
         Vector3 moveDirection = new Vector3(x, 0f, z);
+        anim.SetFloat("X", x);
+        anim.SetFloat("Z", z);
         moveDirection = transform.TransformDirection(moveDirection);
         rb.velocity = moveDirection * moveSpeed;
 
@@ -171,7 +177,7 @@ public class PlayerController : MonoBehaviour
 
     void findObject(out GameObject nearestNPC, out GameObject nearestBomb, out GameObject nearestWindow, out GameObject nearestShortcut, out GameObject nearestCarriable)
     {
-        Collider[] colls = Physics.OverlapSphere(this.transform.position, 3f, (bombLayer | windowLayer | shortcutLayer));   // 탐지해야 할 것 : 함정, 은닉처, 지름길
+        Collider[] colls = Physics.OverlapSphere(this.transform.position, 4f, (bombLayer | windowLayer | shortcutLayer));   // 탐지해야 할 것 : 함정, 은닉처, 지름길
         List<GameObject> bombs = new List<GameObject>();
         List<GameObject> windows = new List<GameObject>();
         List<GameObject> shortcuts = new List<GameObject>();
@@ -323,7 +329,13 @@ public class PlayerController : MonoBehaviour
 
     void killNpc(GameObject target)
     {
-        if (target != null) { target.GetComponent<NPCController>().fDead(); OneGameManager.Instance.addScore(30); }
+        if (target != null)
+        {
+            if (PlayerBeamController.Instance == null) { Debug.Log("플레이어빔이 문제"); }
+            PlayerBeamController.Instance.DrawLine(eyePos, target);
+            target.GetComponent<NPCController>().fDead();
+            OneGameManager.Instance.addScore(30);
+        }
         else { Debug.Log("타겟 없음"); }
     }
     void provokeNpc(GameObject target)
@@ -390,12 +402,16 @@ public class PlayerController : MonoBehaviour
     public bool getChased() { return isChased; }
     public void inArrested(GameObject Police)
     {
+        anim.SetFloat("X", 0);
+        anim.SetFloat("Z", 0);
         isArrested = true;
+        anim.SetBool("Carried", true);
         StartCoroutine(cArrested(Police));
     }
-    public void outArrested() { isArrested = false; this.transform.position = new Vector3(this.transform.position.x, 0f, this.transform.position.z); }
+    public void outArrested() { anim.SetBool("Carried", false); isArrested = false; this.transform.position = new Vector3(this.transform.position.x, 0f, this.transform.position.z); }
     IEnumerator cArrested(GameObject police)
     {
+        rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
         while (true)
         {
             if (!isArrested) break;
@@ -403,6 +419,8 @@ public class PlayerController : MonoBehaviour
             rb.velocity = moveDirection * (police.GetComponent<PoliceController>().fGetSpeed());
             yield return null;
         }
+        this.transform.position = new Vector3(this.transform.position.x, 0f, this.transform.position.z);
+        rb.constraints |= RigidbodyConstraints.FreezePositionY;
     }
 
     public void fDead()

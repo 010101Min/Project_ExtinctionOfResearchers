@@ -66,7 +66,7 @@ public class OneGameUIController : MonoBehaviour
 
     // 각종 버튼 함수들
     public void ContinueGame() { OptionPanel.gameObject.SetActive(false); }
-    public void RestartGame() { SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
+    public void RestartGame() { OneGameManager.Instance.GameContinued(); SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
 
 
     // OptionPanel 함수

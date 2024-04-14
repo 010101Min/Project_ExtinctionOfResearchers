@@ -9,7 +9,7 @@ public class AmbulanceController : MonoBehaviour
     private GameObject startPos;
     private GameObject parkPos;
     private GameObject endPos;
-    private GameObject policePos;
+    public GameObject paramedicPos;
 
     public GameObject Paramedic;
 
@@ -58,7 +58,7 @@ public class AmbulanceController : MonoBehaviour
         }
         isArrive = true;
         transform.position = parkPos.transform.position;
-        Paramedic.transform.position = parkPos.transform.position;
+        Paramedic.transform.position = paramedicPos.transform.position;
         Paramedic.GetComponent<ParamedicController>().StartResolve();
     }
 

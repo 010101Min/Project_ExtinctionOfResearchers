@@ -65,11 +65,11 @@ public class OneGameManager : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Escape)) { GamePaused(); }
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            foreach (GameObject bomb in bombs) {  bomb.GetComponent<BombController>().showCrossHair(); }
+            foreach (GameObject bomb in bombs) { if (bomb != null) bomb.GetComponent<BombController>().showCrossHair(); }
         }
         else if (Input.GetKeyUp(KeyCode.LeftControl))
         {
-            foreach (GameObject bomb in bombs) { bomb.GetComponent<BombController>().hideCrossHair(); }
+            foreach (GameObject bomb in bombs) { if (bomb != null) bomb.GetComponent<BombController>().hideCrossHair(); }
         }
         if (!isGameOver && !isGameClear && !isGamePaused)
         {
@@ -84,8 +84,8 @@ public class OneGameManager : MonoBehaviour
     {
         if (!isGameOver && !isGameClear && !isGamePaused)
         {
+            Camera.main.gameObject.transform.position = CameraPos.transform.position;
             Camera.main.gameObject.transform.SetParent(CameraPos.transform);
-            Camera.main.gameObject.transform.position = Vector3.zero + 5 * Vector3.up;
             CameraPos.GetComponent<CameraController>().fCameraRotate();
             isGameOver = true;
             OneGameUIController.Instance.showGameOverPanel(score);
@@ -96,8 +96,8 @@ public class OneGameManager : MonoBehaviour
     {
         if (!isGameOver && !isGameClear && !isGamePaused)
         {
+            Camera.main.gameObject.transform.position = CameraPos.transform.position;
             Camera.main.gameObject.transform.SetParent(CameraPos.transform);
-            Camera.main.gameObject.transform.position = Vector3.zero + 3 * Vector3.up;
             CameraPos.GetComponent<CameraController>().fCameraRotate();
             isGameClear = true;
             int timeBonus = 0;

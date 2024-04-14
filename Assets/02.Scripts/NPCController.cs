@@ -327,13 +327,7 @@ public class NPCController : MonoBehaviour
             anim.SetBool("Run", false);
             anim.SetBool("Walk", false);
         }
-        else if (sState == "Carried")
-        {
-            anim.SetBool("Carried", true);
-            anim.SetBool("Sleep", false);
-            anim.SetBool("Run", false);
-            anim.SetBool("Walk", false);
-        }
+        else if (sState == "Carried") { anim.SetBool("Carried", true); }
     }
     public void dropCorpse() { anim.SetBool("Carried", false); }
 
