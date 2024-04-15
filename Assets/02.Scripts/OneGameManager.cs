@@ -222,4 +222,9 @@ public class OneGameManager : MonoBehaviour
     {
         ambulance.GetComponent<AmbulanceController>().Report(corpses);
     }
+
+    // 마우스 감도
+    public void SensitivityUp() { player.GetComponent<PlayerLookAround>().SensitivityUp(); }
+    public void SensitivityDown() { player.GetComponent<PlayerLookAround>().SensitivityDown(); }
+    public float SensitivityShow() { return player.GetComponent<PlayerLookAround>().getSensitivity(); }
 }

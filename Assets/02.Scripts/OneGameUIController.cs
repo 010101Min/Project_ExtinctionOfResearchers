@@ -27,6 +27,7 @@ public class OneGameUIController : MonoBehaviour
     public Text TeleportText;
 
     public GameObject OptionPanel;
+    public Text OptionSensText;
     public GameObject GameOverPanel;
     public GameObject GameClearPanel;
 
@@ -70,7 +71,7 @@ public class OneGameUIController : MonoBehaviour
 
 
     // OptionPanel 함수
-    public void showOptionPanel() { OptionPanel.gameObject.SetActive(true); }
+    public void showOptionPanel() { UpdateSensitivity(); OptionPanel.gameObject.SetActive(true); }
     
     // GameOverPanel 함수
     public void showGameOverPanel(int score)
@@ -88,6 +89,10 @@ public class OneGameUIController : MonoBehaviour
         if (bonus == 0) { scoreText.text = "SCORE: " + score.ToString(); }
         else { scoreText.text = $"SCORE: {score} + {bonus} = {score + bonus}"; }
     }
+
+    private void UpdateSensitivity() { OptionSensText.text = ((int)OneGameManager.Instance.SensitivityShow()/10).ToString(); }
+    public void PushSensUpBtn() { OneGameManager.Instance.SensitivityUp(); UpdateSensitivity(); }
+    public void PushSensDownBtn() { OneGameManager.Instance.SensitivityDown(); UpdateSensitivity(); }
 
 
     public void InAttack() { AttackText.gameObject.SetActive(true); }

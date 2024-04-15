@@ -88,10 +88,10 @@ public class PlayerController : MonoBehaviour
         else if (!Input.GetKey(KeyCode.LeftShift) || (x == 0 && z == 0)) { isRunning = false; }
 
         Vector3 moveDirection = new Vector3(x, 0f, z);
-        anim.SetFloat("X", x);
-        anim.SetFloat("Z", z);
         moveDirection = transform.TransformDirection(moveDirection);
         rb.velocity = moveDirection * moveSpeed;
+        anim.SetFloat("X", x * moveSpeed);
+        anim.SetFloat("Z", z * moveSpeed);
 
         findObject(out nearestNPC, out nearestBomb, out nearestWindow, out nearestShortcut, out nearestCarriable);
 
@@ -134,8 +134,10 @@ public class PlayerController : MonoBehaviour
                 Transform newTrans = nearestShortcut.GetComponent<ShortCutController>().UseShortCut(this.gameObject);
                 if (newTrans != null)
                 {
-                    this.gameObject.transform.position = newTrans.position;
-                    this.gameObject.transform.rotation = newTrans.rotation;
+                    //this.gameObject.transform.position = newTrans.position;
+                    //this.gameObject.transform.rotation = newTrans.rotation;
+                    rb.MovePosition(newTrans.position);
+                    rb.MoveRotation(newTrans.rotation);
                 }
             }
         }

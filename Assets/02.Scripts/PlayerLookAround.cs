@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerLookAround : MonoBehaviour
 {
-    public float turnSpeed = 120f;
+    public int turnSpeed = 120;
     Rigidbody rb;
 
     void Start()
@@ -18,4 +18,8 @@ public class PlayerLookAround : MonoBehaviour
         float turn = r * turnSpeed * Time.deltaTime;
         rb.rotation = rb.rotation * Quaternion.Euler(0f, turn, 0f);
     }
+
+    public void SensitivityUp() { turnSpeed += 10; }
+    public void SensitivityDown() { turnSpeed -= 10; }
+    public int getSensitivity() { return turnSpeed; }
 }
