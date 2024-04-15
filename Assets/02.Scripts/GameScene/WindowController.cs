@@ -12,6 +12,8 @@ public class WindowController : MonoBehaviour
     IEnumerator AbandonCorpse(GameObject corpse)
     {
         Vector3 dir = (this.transform.position - corpse.transform.forward).normalized;
+        if (corpse.CompareTag("NPC")) { corpse.GetComponent<NPCController>().dropCorpse(); }
+        else { corpse.GetComponent<PoliceController>().dropCorpse(); }
         while (corpse != null)
         {
             corpse.transform.position += dir * 10f * Time.deltaTime;

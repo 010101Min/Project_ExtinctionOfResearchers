@@ -20,6 +20,7 @@ public class ParamedicController : MonoBehaviour
         agent.speed = 7f;
         anim = GetComponentInChildren<Animator>();
         anim.SetBool("Finish", true); anim.SetBool("Resolve", false);
+        gameObject.SetActive(false);
     }
 
     public void Report(List<GameObject> Corps)
