@@ -90,8 +90,14 @@ public class PlayerController : MonoBehaviour
         Vector3 moveDirection = new Vector3(x, 0f, z);
         moveDirection = transform.TransformDirection(moveDirection);
         rb.velocity = moveDirection * moveSpeed;
-        anim.SetFloat("X", x * moveSpeed);
-        anim.SetFloat("Z", z * moveSpeed);
+        if ((x <= 0.1f && x >= -0.1f) && (z <= 0.1f && z >= -0.1f)) { anim.SetBool("isMove", false); }
+        else
+        {
+            anim.SetBool("isMove", true);
+            anim.SetFloat("Speed", (moveDirection * moveSpeed).magnitude);
+            anim.SetFloat("X", x * moveSpeed);
+            anim.SetFloat("Z", z * moveSpeed);
+        }
 
         findObject(out nearestNPC, out nearestBomb, out nearestWindow, out nearestShortcut, out nearestCarriable);
 
@@ -406,6 +412,8 @@ public class PlayerController : MonoBehaviour
     {
         anim.SetFloat("X", 0);
         anim.SetFloat("Z", 0);
+        anim.SetFloat("Speed", 0);
+        anim.SetBool("isMove", false);
         isArrested = true;
         anim.SetBool("Carried", true);
         StartCoroutine(cArrested(Police));

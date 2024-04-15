@@ -8093,7 +8093,7 @@ PrefabInstance:
     - target: {fileID: 7734378322720904700, guid: e53d8dd9d21789f4ea70b151cbe7fc9e, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 58692c04871ae9d4e91a1f170954b3ad, type: 2}
+      objectReference: {fileID: 9100000, guid: b4843b124d6db8b4882ae7c40f721b1b, type: 2}
     - target: {fileID: 7734378322730395540, guid: e53d8dd9d21789f4ea70b151cbe7fc9e, type: 3}
       propertyPath: m_Name
       value: FixAppearance
