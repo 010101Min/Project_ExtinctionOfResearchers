@@ -9507,7 +9507,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "ESC\tGAME PAUSE\r\nQ\tPROVOKE\r\nE\tATTACK\r\nWASD\tMOVE\r\nSHIFT\tSPRINT\r\nCTRL\tSHOW
-    INTERACTABLE OBJECTS\r\nSPACE\tINTERATCTIVE WITH OBJECT\r"
+    INTERACTABLE OBJECTS\r\nSPACE\tINTERATCT WITH OBJECT\r"
 --- !u!222 &1946265011
 CanvasRenderer:
   m_ObjectHideFlags: 0

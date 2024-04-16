@@ -66,7 +66,15 @@ public class OneGameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.Escape)) { GamePaused(); }
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            if (OneGameUIController.Instance.isOptionPanelOpen())
+            {
+                GameContinued();
+                OneGameUIController.Instance.ContinueGame();
+            }
+            else { GamePaused(); }
+        }
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             foreach (GameObject bomb in bombs) { if (bomb != null) bomb.GetComponent<BombController>().showCrossHair(); }

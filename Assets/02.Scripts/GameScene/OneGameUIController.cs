@@ -75,7 +75,8 @@ public class OneGameUIController : MonoBehaviour
 
     // OptionPanel 함수
     public void showOptionPanel() { UpdateSensitivity(); OptionPanel.gameObject.SetActive(true); }
-    
+    public bool isOptionPanelOpen() { return OptionPanel.gameObject.activeSelf; }
+
     // GameOverPanel 함수
     public void showGameOverPanel(int score)
     {
