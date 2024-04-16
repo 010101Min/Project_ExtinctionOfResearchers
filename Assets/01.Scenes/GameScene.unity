@@ -4067,6 +4067,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotateSpeed: 10
+  redLight: {fileID: 1809631399}
 --- !u!1 &956783066
 GameObject:
   m_ObjectHideFlags: 0
