@@ -98,6 +98,7 @@ public class OneGameManager : MonoBehaviour
     {
         if (!isGameOver && !isGameClear && !isGamePaused)
         {
+            Cursor.lockState = CursorLockMode.None;
             Camera.main.gameObject.transform.position = CameraPos.transform.position;
             Camera.main.gameObject.transform.SetParent(CameraPos.transform);
             CameraPos.GetComponent<CameraController>().fCameraRotate();
@@ -111,6 +112,7 @@ public class OneGameManager : MonoBehaviour
     {
         if (!isGameOver && !isGameClear && !isGamePaused)
         {
+            Cursor.lockState = CursorLockMode.None;
             Camera.main.gameObject.transform.position = CameraPos.transform.position;
             Camera.main.gameObject.transform.SetParent(CameraPos.transform);
             CameraPos.GetComponent<CameraController>().fCameraRotate();
@@ -133,6 +135,7 @@ public class OneGameManager : MonoBehaviour
     {
         if (!isGameOver && !isGameClear && !isGamePaused)
         {
+            Cursor.lockState = CursorLockMode.None;
             isGamePaused = true;
             Time.timeScale = 0f;
             OneGameUIController.Instance.showOptionPanel();
@@ -140,6 +143,7 @@ public class OneGameManager : MonoBehaviour
     }
     public void GameContinued()
     {
+        Cursor.lockState = CursorLockMode.Locked;
         Time.timeScale = 1f;
         isGamePaused = false;
     }

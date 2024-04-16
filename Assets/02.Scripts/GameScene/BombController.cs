@@ -175,13 +175,14 @@ public class BombController : MonoBehaviour
             }
 
             // 시신들 처리
-            Collider[] targets2 = Physics.OverlapSphere(transform.position, 10f, corpseLayer);
+            Collider[] targets2 = Physics.OverlapSphere(transform.position, 10f, (corpseLayer | invisiblecorpseLayer));
             for (int i = 0; i < targets2.Length; i++)
             {
                 GameObject target = targets2[i].gameObject;
                 Vector3 dirToTarget = (target.transform.position - transform.position).normalized;
                 float distToTarget = Vector3.Distance(transform.position, target.transform.position);
-                if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, wallLayer)) { target.gameObject.layer = LayerMask.NameToLayer("INVISIBLECORPSE"); }
+                if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, wallLayer) && (distToTarget <= 10f)) { target.gameObject.layer = LayerMask.NameToLayer("INVISIBLECORPSE"); }
+                else { target.gameObject.layer = LayerMask.NameToLayer("CORPSE"); }
             }
 
             Vector3 dirToPlayer = (player.transform.position - transform.position).normalized;

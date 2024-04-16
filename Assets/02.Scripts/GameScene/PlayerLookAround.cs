@@ -10,6 +10,7 @@ public class PlayerLookAround : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        Cursor.lockState = CursorLockMode.Locked;
     }
     
     void Update()

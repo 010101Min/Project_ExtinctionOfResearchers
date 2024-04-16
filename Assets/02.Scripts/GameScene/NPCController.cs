@@ -177,11 +177,12 @@ public class NPCController : MonoBehaviour
     {
         anim.SetTrigger("Die"); anim.SetBool("Carried", false); anim.SetBool("Dead", true);
         initCoroutine();
+        if (gameObject.layer == LayerMask.NameToLayer("INVISIBLENPC")) { gameObject.layer = LayerMask.NameToLayer("INVISIBLECORPSE"); }
+        else { gameObject.layer = LayerMask.NameToLayer("CORPSE"); }
         isDead = true;
         agent.enabled = false;
         isCarriable = true;
         witnessable = false;
-        gameObject.layer = LayerMask.NameToLayer("CORPSE");
         icon.GetComponent<NPCStatusIconController>().showDead();
         // 게임매니저에서 킬 수 올리기 필요
         OneGameManager.Instance.killPeopleCount();

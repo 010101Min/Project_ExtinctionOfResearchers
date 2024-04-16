@@ -7676,9 +7676,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2097130109}
-        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: SelectMapBtn
+      - m_Target: {fileID: 1469273092}
+        m_TargetAssemblyTypeName: OneGameManager, Assembly-CSharp
+        m_MethodName: GameContinued
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7688,9 +7688,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1469273092}
-        m_TargetAssemblyTypeName: OneGameManager, Assembly-CSharp
-        m_MethodName: GameContinued
+      - m_Target: {fileID: 2097130109}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: SelectMapBtn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8511,7 +8511,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1659103651
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9508,7 +9508,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "ESC\tGAME PAUSE\r\nQ\tPROVOKE\r\nE\tATTACK\r\nWASD\tMOVE\r\nSHIFT\tSPRINT\r\nCTRL\tSHOW
-    INTERACTABLE OBJECTS\r\nSPACE\tINTERATCT WITH OBJECT\r"
+    INTERACTABLE OBJECTS\r\nSPACE\tINTERACT WITH OBJECT\r"
 --- !u!222 &1946265011
 CanvasRenderer:
   m_ObjectHideFlags: 0
