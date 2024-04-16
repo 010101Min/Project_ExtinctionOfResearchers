@@ -241,7 +241,7 @@ public class PoliceController : MonoBehaviour
             if (corpse.CompareTag("Police")) { if (!corpse.GetComponent<PoliceController>().fGetHidden() && !Corpse.Contains(corpse)) { Corpse.Add(corpse); } }
         }
         chaseTime = time;
-        if (suspect == reporter || suspect == null) { if (oldState != State.CHASE) ChangeState(State.RESOLVE); }
+        if (suspect == reporter || suspect == null) { if ((oldState != State.CHASE) || (state == State.CHASE)) ChangeState(State.RESOLVE); }
         else if (suspect.CompareTag("NPC") && suspect.GetComponent<NPCController>().fGetDead()) { if (oldState != State.CHASE) ChangeState(State.RESOLVE); }
         else
         {

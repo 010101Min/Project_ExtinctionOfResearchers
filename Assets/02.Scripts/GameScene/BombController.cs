@@ -8,6 +8,7 @@ public class BombController : MonoBehaviour
 {
     public GameObject ExplosionEffect;
     public GameObject FireEffect;
+    public GameObject PoisonEffect;
 
     public Image defaultBombIcon;
     public Image poisonBombIcon;
@@ -183,6 +184,11 @@ public class BombController : MonoBehaviour
                 if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, wallLayer)) { target.gameObject.layer = LayerMask.NameToLayer("INVISIBLECORPSE"); }
             }
 
+            Vector3 dirToPlayer = (player.transform.position - transform.position).normalized;
+            float distToPlayer = Vector3.Distance(transform.position, player.transform.position);
+            if (!Physics.Raycast(transform.position, dirToPlayer, distToPlayer, wallLayer) && (distToPlayer <= 10f)) { player.gameObject.layer = LayerMask.NameToLayer("UNINTERACTABLE"); }
+            else { player.gameObject.layer = LayerMask.NameToLayer("PLAYER"); }
+
             fireIcon.transform.position = Camera.main.WorldToScreenPoint(new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 1f, this.gameObject.transform.position.z));
 
             float distance = Vector3.Distance(this.gameObject.transform.position, mainCamera.transform.position);
@@ -205,13 +211,14 @@ public class BombController : MonoBehaviour
         Destroy(effect);
         Collider[] blindnpcs = Physics.OverlapSphere(transform.position, 12f, invisiblenpcLayer);
         for (int i = 0; i < blindnpcs.Length; i++) { blindnpcs[i].GetComponent<NPCController>().fOutBlinded(); }    // NPC가 실명 상태 회복
-        Collider[] blindcorpses = Physics.OverlapSphere(transform.position, 10f, invisiblecorpseLayer);
+        Collider[] blindcorpses = Physics.OverlapSphere(transform.position, 12f, invisiblecorpseLayer);
         for (int i = 0; i < blindcorpses.Length; i++) { blindcorpses[i].gameObject.layer = LayerMask.NameToLayer("CORPSE"); }
     }
 
     // 독 함수
     IEnumerator cPoisonUse()
     {
+        GameObject effect = Instantiate(PoisonEffect, this.transform.position, Quaternion.identity);
         Dictionary<GameObject, bool> poisonDictionary = new Dictionary<GameObject, bool>();
         
         float timer = 0f;
@@ -266,6 +273,7 @@ public class BombController : MonoBehaviour
         }
 
         Destroy(poisonIcon.gameObject);
+        Destroy(effect);
         Collider[] poisonednpcs = Physics.OverlapSphere(transform.position, 12f, (npcLayer | invisiblenpcLayer));
         for (int i = 0; i < poisonednpcs.Length; i++) { StopCoroutine(cPoison(poisonednpcs[i].gameObject)); }
     }

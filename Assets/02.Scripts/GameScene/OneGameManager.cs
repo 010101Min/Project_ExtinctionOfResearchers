@@ -36,8 +36,11 @@ public class OneGameManager : MonoBehaviour
     public GameObject CameraPos;
 
     private GameObject[] bombs;
+    private GameObject[] windows;
 
     public List<GameObject> Corpses = new List<GameObject>();
+
+    public GameObject teleportEffect;
 
     private void Awake()
     {
@@ -58,6 +61,7 @@ public class OneGameManager : MonoBehaviour
         OneGameUIController.Instance.targetCount(targetCount, 0);
         OneGameUIController.Instance.peopleCount(peopleCount, 0);
         bombs = GameObject.FindGameObjectsWithTag("Bomb");
+        windows = GameObject.FindGameObjectsWithTag("Window");
     }
 
     void Update()
@@ -66,10 +70,12 @@ public class OneGameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             foreach (GameObject bomb in bombs) { if (bomb != null) bomb.GetComponent<BombController>().showCrossHair(); }
+            foreach (GameObject window in windows) { if (window != null) window.GetComponent<WindowController>().showCrossHair(); }
         }
         else if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             foreach (GameObject bomb in bombs) { if (bomb != null) bomb.GetComponent<BombController>().hideCrossHair(); }
+            foreach (GameObject window in windows) { if (window != null) window.GetComponent<WindowController>().hideCrossHair(); }
         }
         if (!isGameOver && !isGameClear && !isGamePaused)
         {
@@ -153,7 +159,13 @@ public class OneGameManager : MonoBehaviour
         {
             targetKillCount++;
             OneGameUIController.Instance.targetCount(targetCount, targetKillCount);
-            if (targetKillCount >= targetCount) { player.GetComponent<PlayerController>().goalAchieved(); OneGameUIController.Instance.showTeleportPanel(); }
+            if (targetKillCount >= targetCount)
+            {
+                GameObject teleport = GameObject.FindGameObjectWithTag("Teleport");
+                player.GetComponent<PlayerController>().goalAchieved();
+                OneGameUIController.Instance.showTeleportPanel();
+                Instantiate(teleportEffect, new Vector3(teleport.transform.position.x, -0.5f, teleport.transform.position.z), Quaternion.identity);
+            }
         }
     }
 
