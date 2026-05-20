@@ -33,6 +33,9 @@ public class OneGameUIController : MonoBehaviour
 
     public GameObject TeleportPanel;
 
+    public Scrollbar BGMScroller;
+    public Scrollbar SFXScroller;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -45,6 +48,8 @@ public class OneGameUIController : MonoBehaviour
         Clearall();
         ContinueGame();
         hideTeleportPanel();
+        BGMScroller.value = PlayerPrefs.GetFloat("BGM");
+        SFXScroller.value = PlayerPrefs.GetFloat("SFX");
     }
 
     // 좌상단 Text 함수들
@@ -69,8 +74,19 @@ public class OneGameUIController : MonoBehaviour
     }
 
     // 각종 버튼 함수들
-    public void ContinueGame() { OptionPanel.gameObject.SetActive(false); }
-    public void RestartGame() { OneGameManager.Instance.GameContinued(); SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
+    public void ContinueGame() { PlayerPrefs.Save(); OptionPanel.gameObject.SetActive(false); BGMManager.instance.PlayGameBGM(); }
+    public void RestartGame() { PlayerPrefs.Save(); OneGameManager.Instance.GameContinued(); SceneManager.LoadScene(SceneManager.GetActiveScene().name); BGMManager.instance.PlayGameBGM(); BGMManager.instance.SetPitchNormal(); }
+    public void SelectMapBtn() { PlayerPrefs.Save(); Cursor.lockState = CursorLockMode.None; SceneManager.LoadScene("SelectMapScene"); BGMManager.instance.PlayMainBGM(); BGMManager.instance.SetPitchNormal(); }
+    public void SetBGMVolume(float value)
+    {
+        BGMManager.instance.SetVolume(value);
+        PlayerPrefs.SetFloat("BGM", value);
+    }
+    public void SetSFXVolume(float value)
+    {
+        SFXManager.instance.SetVolume(value);
+        PlayerPrefs.SetFloat("SFX", value);
+    }
 
 
     // OptionPanel 함수
@@ -80,6 +96,7 @@ public class OneGameUIController : MonoBehaviour
     // GameOverPanel 함수
     public void showGameOverPanel(int score)
     {
+        BGMManager.instance.SetPitchNormal();
         GameOverPanel.gameObject.SetActive(true);
         Text scoreText = GameOverPanel.transform.Find("ScoreText").gameObject.GetComponent<Text>();
         scoreText.text = "SCORE: " + score.ToString();
@@ -88,6 +105,7 @@ public class OneGameUIController : MonoBehaviour
     // GameClearPanel 함수
     public void showGameClearPanel(int score, int bonus)
     {
+        BGMManager.instance.SetPitchNormal();
         GameClearPanel.gameObject.SetActive(true);
         Text scoreText = GameClearPanel.transform.Find("ScoreText").gameObject.GetComponent<Text>();
         if (bonus == 0) { scoreText.text = "SCORE: " + score.ToString(); }
@@ -97,7 +115,7 @@ public class OneGameUIController : MonoBehaviour
     public void showTeleportPanel() { TeleportPanel.SetActive(true); }
     public void hideTeleportPanel() { TeleportPanel.SetActive(false); }
 
-    private void UpdateSensitivity() { OptionSensText.text = ((int)OneGameManager.Instance.SensitivityShow()/10).ToString(); }
+    private void UpdateSensitivity() { OptionSensText.text = OneGameManager.Instance.SensitivityShow().ToString(); }
     public void PushSensUpBtn() { OneGameManager.Instance.SensitivityUp(); UpdateSensitivity(); }
     public void PushSensDownBtn() { OneGameManager.Instance.SensitivityDown(); UpdateSensitivity(); }
 

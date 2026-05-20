@@ -139,6 +139,7 @@ public class PlayerController : MonoBehaviour
                 Transform newTrans = nearestShortcut.GetComponent<ShortCutController>().UseShortCut(this.gameObject);
                 if (newTrans != null)
                 {
+                    SFXManager.instance.PlayShortcut();
                     rb.MovePosition(newTrans.position);
                     rb.MoveRotation(newTrans.rotation);
                 }
@@ -338,6 +339,7 @@ public class PlayerController : MonoBehaviour
         {
             if (PlayerBeamController.Instance == null) { Debug.Log("플레이어빔이 문제"); }
             PlayerBeamController.Instance.DrawLine(eyePos, target);
+            SFXManager.instance.PlayLaser();
             target.GetComponent<NPCController>().fDead();
             OneGameManager.Instance.addScore(30);
         }
@@ -346,7 +348,7 @@ public class PlayerController : MonoBehaviour
     void provokeNpc(GameObject target)
     {
         int rand = Random.Range(1, 101);
-        if (target != null) { target.GetComponent<NPCController>().CheckProvoked(rand); }
+        if (target != null) { target.GetComponent<NPCController>().CheckProvoked(rand); SFXManager.instance.PlayProvoke(); }
         else { Debug.Log("타겟 없음"); }
     }
     IEnumerator cCarryBody(GameObject body)
@@ -379,6 +381,7 @@ public class PlayerController : MonoBehaviour
     }
     void hideBody(GameObject body)
     {
+        SFXManager.instance.PlayThrow();
         moveSpeed *= 1.6f;
         isCarrying = false;
         carryingBody = null;
@@ -397,12 +400,14 @@ public class PlayerController : MonoBehaviour
         isChased = true;
         HandCuff.enabled = true;
         ArrestLight.gameObject.SetActive(true);
+        BGMManager.instance.SetPitchHigh();
     }
     public void outChased()
     {
         isChased = false;
         HandCuff.enabled = false;
         ArrestLight.gameObject.SetActive(false);
+        BGMManager.instance.SetPitchNormal();
     }
     public bool getChased() { return isChased; }
     public void inArrested(GameObject Police)

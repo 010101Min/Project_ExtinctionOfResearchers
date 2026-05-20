@@ -60,11 +60,13 @@ public class BombController : MonoBehaviour
             {
                 AfterUse();
                 StartCoroutine(cFireUse());
+                SFXManager.instance.PlayFireextinguisher();
             }
             else
             {
                 AfterUse();
                 StartCoroutine(cPoisonUse());
+                SFXManager.instance.PlayPoison();
             }
         }
     }
@@ -86,7 +88,7 @@ public class BombController : MonoBehaviour
     // 폭발물 함수
     // 폭발 전 카운트다운
     IEnumerator cBombUse()
-    {
+    {        
         float timer = 0f;
         Image bombIcon = Instantiate(defaultBombIcon, Vector3.zero, Quaternion.identity, GameObject.Find("UICanvas").transform);
         bombIcon.fillAmount = 1f;
@@ -111,6 +113,7 @@ public class BombController : MonoBehaviour
         }
         // 폭발
         Destroy(bombIcon.gameObject);
+        SFXManager.instance.PlayBomb();
         fBombExplosion();
     }
     // 폭발 범위 함수
