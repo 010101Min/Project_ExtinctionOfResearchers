@@ -69,7 +69,7 @@ FSM 기반으로 시민 NPC의 상태와 행동 패턴을 관리하였으며,
 - 최적화 및 충돌 감지 정확도 향상을 위해 게임 오브젝트의 레이어를 분리하였습니다.
 - 이를 통해 NPC 시야 판정, 아이템 감지, 벽 너머 탐지 오류 등을 개선하였습니다.
 
-### 사용 에셋
+## 사용 에셋
 
 - 배경 : 3D Scifi Kit Starter Kit (Creepy Cat)
 - 인물 모델링 : SIMPLE modular human (255 pixel studios)
