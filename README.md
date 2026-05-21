@@ -10,15 +10,15 @@
 
 | 시민 NPC 상태 | 경찰에게 추격당하는 플레이어 |
 |---|---|
-| <img src="https://github.com/user-attachments/assets/52fcb14d-6f62-4680-b957-1a04c1e0e996" width="400"> | <img src="https://github.com/user-attachments/assets/37175dad-fe24-4988-b63f-4c0855691442" width="400"> |
+| <img src="./Images/NPCStatus.png" width="400"> | <img src="./Images/PlayerChased.png" width="400"> |
 
 | 플레이어 상호작용(공격) | 아이템 사용(폭탄) |
 |---|---|
-| <img src="https://github.com/user-attachments/assets/59f6c94d-e884-4fae-a868-5fd6581ce74d" width="400"> | <img src="https://github.com/user-attachments/assets/27775ecc-b23c-4caf-a097-694d7ac36dd5" width="400"> |
+| <img src="./Images/Laser.png" width="400"> | <img src="./Images/Bomb.png" width="400"> |
 
 | 사건 발생 및 반응 |
 |---|
-| <img src="https://github.com/user-attachments/assets/424dcbda-de38-4094-9753-995558b0f426" width="700"> |
+| <img src="./Images/Chaos.png" width="700"> |
 |1. 시신을 발견하지 못해 평화로운 NPC <br>2. 시신을 발견하고 용의자를 빨간 선으로 의심하는 NPC <br>3. 시신을 신고하기 위해 전화기로 달려가는 NPC|
 
 
